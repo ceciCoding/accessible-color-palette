@@ -11,8 +11,12 @@ const RATIOS = {
   900: 14.1,
 }
 
+let cache = {}
 
 export function generatePalette(color, contrastColor) {
+  if (!validateParams()) return null
+  const cacheKey = `${color}-${contrastColor}`
+  if (cache[cacheKey]) return cache[cacheKey]
   let colors = {
     100: null,
     300: null,
@@ -30,6 +34,7 @@ export function generatePalette(color, contrastColor) {
   const paletteColors = ['700', '100', '300', '600', '800', '900'].map((name) => {
     return colorFunctions[name] ? colorFunctions[name]() : getColor(name)
   })
+  cache[cacheKey] = colors
   return colors
 
   function adjustLight(color, ratio) {
@@ -75,21 +80,49 @@ export function generatePalette(color, contrastColor) {
     const newColor = adjustLight(colors['100'].hex, RATIOS[name], contrastColor)
     colors[name] = paletteColorBuilder(name, newColor.hex, `(${newColor.ratio}:1 on 100)`)
   }
+
+  function paletteColorBuilder(name, color, info) {
+    const rgb = hexToRgb(color)
+    if (!rgb) {
+      console.error(`Invalid color: ${color}`)
+      return null
+    }
+    return {
+      name,
+      rgb,
+      hex: color,
+      hsl: rgb2Hsl(rgb.r, rgb.g, rgb.b),
+      info,
+    }
+  }
+
+  function validateParams() {
+    let errorMessage = ''
+
+    if (!color) {
+      errorMessage = 'Missing base color'
+    } else if (!contrastColor) {
+      errorMessage = 'Missing contrast color'
+    } else if (!isValidHexColor(color)) {
+      errorMessage = 'Invalid base color. Use a valid hex color'
+    } else if (contrastColor !== 'white' && contrastColor !== 'black') {
+      errorMessage = 'Invalid contrast color. Use "white" or "black"'
+    }
+
+    if (errorMessage) {
+      console.error('Accessible color palette:', errorMessage)
+      return false
+    }
+
+    return true
+  }
 }
 
-function paletteColorBuilder(name, color, info) {
-  const rgb = hexToRgb(color)
-  if (!rgb) {
-    console.error(`Invalid color: ${color}`)
-    return null
-  }
-  return {
-    name,
-    rgb,
-    hex: color,
-    hsl: rgb2Hsl(rgb.r, rgb.g, rgb.b),
-    info,
-  }
+
+function isValidHexColor(hex) {
+  if (!hex) return false
+  const regex = /[0-9A-Fa-f]{6}/g
+  return Boolean(hex.match(regex))
 }
 
 
