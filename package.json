@@ -1,0 +1,38 @@
+{
+  "name": "accessible-color-palette",
+  "version": "1.0.0",
+  "description": "build accessible monochromatic color palettes from any color of your choice",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs",
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "jest",
+    "lint": "eslint",
+    "build": "webpack",
+    "watch": "webpack --watch"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ceciCoding/acesssible-palette"
+  },
+  "keywords": [
+    "accessibility",
+    "ux/ui"
+  ],
+  "author": "Ceci Olivera & Marta Hollingsworth",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ceciCoding/acesssible-palette/issues"
+  },
+  "homepage": "https://github.com/ceciCoding/acesssible-palette#readme",
+  "dependencies": {
+    "@mdhnpm/color-contrast-ratio-calculator": "^1.0.4",
+    "colorsys": "^1.0.22"
+  },
+  "devDependencies": {
+    "webpack": "^5.76.3",
+    "webpack-cli": "^5.0.1"
+  }
+}

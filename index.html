@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Accessible Color Palette Example</title>
+</head>
+<body>
+  <script src="dist/accessible-color-palette.bundle.js"></script>
+  <script>
+    const palette = AccessibleColorPalette.generatePalette('#56aaaa', 'black');
+    const pallete2 = AccessibleColorPalette.generatePalette('#ff89ee', 'black');
+    const pallete3 = AccessibleColorPalette.generatePalette('#56aaaa', 'white');
+    const pallete4 = AccessibleColorPalette.generatePalette('#ff89ee', 'white');
+    console.log(palette);
+    console.log(pallete2);
+    console.log(pallete3);
+    console.log(pallete4);
+  </script>
+</body>
+</html>
