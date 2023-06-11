@@ -29,7 +29,7 @@ export function generatePalette(color, contrastColor) {
   const contrastRatio = colorContrastRatioCalculator(color, contrastColorHex)
   const colorFunctions = {
     '100': get100,
-    '700': () => get700(color, contrastColor, contrastRatio),
+    '700': () => get700,
   }
   const paletteColors = ['700', '100', '300', '600', '800', '900'].map((name) => {
     return colorFunctions[name] ? colorFunctions[name]() : getColor(name)
@@ -87,6 +87,7 @@ export function generatePalette(color, contrastColor) {
       console.error(`Invalid color: ${color}`)
       return null
     }
+
     return {
       name,
       rgb,
