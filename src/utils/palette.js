@@ -1,21 +1,29 @@
-import { rgb2Hsl, hexToRgb } from 'colorsys'
+import { rgb2Hsl, hexToRgb, hex2Hsl, hsl2Hex } from 'colorsys'
 import { colorContrastRatioCalculator } from '@mdhnpm/color-contrast-ratio-calculator'
-import { darken, lighten } from './light'
+import { darken, illuminate } from './light'
 
 const RATIOS = {
   100: 4.5,
-  300: 1.46,
-  600: 3.08,
-  700: 5.12,
-  800: 9,
-  900: 14.1,
+  300: 3.1,
+  600: 3.1,
+  700: 5.1,
+  800: 3.1,
+  900: 3.1,
+}
+
+const ORIGIN_COLORS = {
+  100: 700,
+  300: 700,
+  600: 100,
+  800: 600,
+  900: 700
 }
 
 let cache = {}
 
-export function generatePalette(color, contrastColor) {
+export function generatePalette(colorHex, bgColor) {
   if (!validateParams()) return null
-  const cacheKey = `${color}-${contrastColor}`
+  const cacheKey = `${colorHex}-${bgColor}`
   if (cache[cacheKey]) return cache[cacheKey]
   let colors = {
     100: null,
@@ -25,87 +33,26 @@ export function generatePalette(color, contrastColor) {
     800: null,
     900: null,
   }
-  const contrastColorHex = contrastColor === 'white' ? '#ffffff' : '#000000'
-  const contrastRatio = colorContrastRatioCalculator(color, contrastColorHex)
-  const colorFunctions = {
-    '100': get100,
-    '700': () => get700(color, contrastColor, contrastRatio),
-  }
-  const paletteColors = ['700', '100', '300', '600', '800', '900'].map((name) => {
-    return colorFunctions[name] ? colorFunctions[name]() : getColor(name)
+  const bgColorHex = bgColor === 'white' ? '#ffffff' : '#000000'
+  const currentContrastRatio = colorContrastRatioCalculator(colorHex, bgColorHex).toFixed(1)
+  colors[700] = get700(colorHex, bgColorHex, currentContrastRatio)
+  const paletteColors = ['100', '300', '600', '800', '900'].map((name) => {
+    return colors[name] = getColor(name, bgColorHex)
   })
   cache[cacheKey] = colors
   return colors
 
-  function adjustLight(color, ratio) {
-    return contrastColor === "black"
-      ? lighten(color, color, ratio)
-      : darken(color, color, ratio)
-  }
-
-  function get700() {
-    let newColor
-    const name = "700"
-    const info = `(${colors[name]}:1 on background)`
-    const contrastColorHex = contrastColor === 'white' ? '#ffffff' : '#000000'
-
-    if (contrastRatio === RATIOS[name]) {
-      colors[name] = paletteColorBuilder(name, color, info)
-      return
-    }
-
-    if (contrastColor === "black") {
-      contrastRatio > RATIOS[name]
-        ? (newColor = darken(color, contrastColorHex, RATIOS[name]))
-        : (newColor = lighten(color, contrastColorHex, RATIOS[name]))
-    } else {
-      contrastRatio > RATIOS[name]
-        ? (newColor = lighten(color, contrastColorHex, RATIOS[name]))
-        : (newColor = darken(color, contrastColorHex, RATIOS[name]))
-    }
-    colors[name] = paletteColorBuilder(name, newColor.hex, info)
-  }
-
-  function get100() {
-    let newColor
-    const name = "100"
-    contrastColor === "black"
-      ? newColor = darken(colors['700'].hex, colors['700'].hex, RATIOS[name])
-      : newColor = lighten(colors['700'].hex, colors['700'].hex, RATIOS[name])
-    colors[name] = paletteColorBuilder(name, newColor.hex, `(${newColor.ratio}:1 on 700)`)
-  }
-
-
-  function getColor(name) {
-    const newColor = adjustLight(colors['100'].hex, RATIOS[name], contrastColor)
-    colors[name] = paletteColorBuilder(name, newColor.hex, `(${newColor.ratio}:1 on 100)`)
-  }
-
-  function paletteColorBuilder(name, color, info) {
-    const rgb = hexToRgb(color)
-    if (!rgb) {
-      console.error(`Invalid color: ${color}`)
-      return null
-    }
-    return {
-      name,
-      rgb,
-      hex: color,
-      hsl: rgb2Hsl(rgb.r, rgb.g, rgb.b),
-      info,
-    }
-  }
 
   function validateParams() {
     let errorMessage = ''
 
-    if (!color) {
+    if (!colorHex) {
       errorMessage = 'Missing base color'
-    } else if (!contrastColor) {
+    } else if (!bgColor) {
       errorMessage = 'Missing contrast color'
-    } else if (!isValidHexColor(color)) {
+    } else if (!isValidHexColor(colorHex)) {
       errorMessage = 'Invalid base color. Use a valid hex color'
-    } else if (contrastColor !== 'white' && contrastColor !== 'black') {
+    } else if (bgColor !== 'white' && bgColor !== 'black') {
       errorMessage = 'Invalid contrast color. Use "white" or "black"'
     }
 
@@ -116,6 +63,89 @@ export function generatePalette(color, contrastColor) {
 
     return true
   }
+
+  function getColor(name, bgColor) {
+    let newColor
+    if (name === '100' || name === '300') {
+      bgColor === '#ffffff' ?
+        newColor = illuminate(RATIOS[name], colors[ORIGIN_COLORS[name]].hex) :
+        newColor = darken(RATIOS[name], colors[ORIGIN_COLORS[name]].hex)
+    } else {
+      bgColor === '#ffffff' ?
+        newColor = darken(RATIOS[name], colors[ORIGIN_COLORS[name]].hex) :
+        newColor = illuminate(RATIOS[name], colors[ORIGIN_COLORS[name]].hex)
+    }
+    return paletteColorBuilder(name, newColor.hex, `(${newColor.ratio}:1 on ${ORIGIN_COLORS[name]})`)
+  }
+
+  function get700(colorHex, bgColorHex, currentContrastRatio) {
+    let newColorHex
+    let newContrastRatio = currentContrastRatio
+    const name = "700"
+    const info = `(${RATIOS[name]}:1 on background)`
+    const colorHsl = hex2Hsl(colorHex)
+
+    if (currentContrastRatio === RATIOS[name]) {
+      colors[name] = paletteColorBuilder(name, color, info)
+      return
+    }
+
+    if (bgColorHex === "#000000") {
+      if (currentContrastRatio > RATIOS[name]) {
+        while (newContrastRatio > RATIOS[name]) {
+          colorHsl.l = colorHsl.l + 1
+          newColorHex = hsl2Hex(colorHsl)
+          newContrastRatio = colorContrastRatioCalculator(bgColorHex, newColorHex).toFixed(1)
+        }
+        if (newContrastRatio < RATIOS[name]) {
+          colorHsl.l = colorHsl.l - 1
+          newColorHex = hsl2Hex(colorHsl)
+          newContrastRatio = colorContrastRatioCalculator(bgColorHex, newColorHex).toFixed(1)
+        }
+      } else {
+        while (newContrastRatio < RATIOS[name]) {
+          colorHsl.l = colorHsl.l - 1
+          newColorHex = hsl2Hex(colorHsl)
+          newContrastRatio = colorContrastRatioCalculator(bgColorHex, newColorHex).toFixed(1)
+        }
+      }
+    } else {
+      if (currentContrastRatio > RATIOS[name]) {
+        while (newContrastRatio > RATIOS[name]) {
+          colorHsl.l = colorHsl.l - 1
+          newColorHex = hsl2Hex(colorHsl)
+          newContrastRatio = colorContrastRatioCalculator(bgColorHex, newColorHex).toFixed(1)
+        }
+        if (newContrastRatio < RATIOS[name]) {
+          colorHsl.l = colorHsl.l + 1
+          newColorHex = hsl2Hex(colorHsl)
+          newContrastRatio = colorContrastRatioCalculator(bgColorHex, newColorHex).toFixed(1)
+        }
+      } else {
+        while (newContrastRatio < RATIOS[name]) {
+          colorHsl.l = colorHsl.l + 1
+          newColorHex = hsl2Hex(colorHsl)
+          newContrastRatio = colorContrastRatioCalculator(bgColorHex, newColorHex).toFixed(1)
+        }
+      }
+    }
+    return paletteColorBuilder(name, newColorHex, info)
+  }
+}
+
+function paletteColorBuilder(name, color, info) {
+  const rgb = hexToRgb(color)
+  if (!rgb) {
+    console.error(`Invalid color: ${color}`)
+    return null
+  }
+  return {
+    name,
+    rgb,
+    hex: color,
+    hsl: rgb2Hsl(rgb.r, rgb.g, rgb.b),
+    info,
+  }
 }
 
 
@@ -124,5 +154,8 @@ function isValidHexColor(hex) {
   const regex = /[0-9A-Fa-f]{6}/g
   return Boolean(hex.match(regex))
 }
+
+
+
 
 
