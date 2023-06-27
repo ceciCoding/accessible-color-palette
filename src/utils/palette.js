@@ -82,7 +82,7 @@ export function generatePalette(colorHex, bgColor) {
     let newColorHex
     let newContrastRatio = currentContrastRatio
     const name = "700"
-    const info = `(${RATIOS[name]}:1 on background)`
+    let info = `(${RATIOS[name]}:1 on background)`
     const colorHsl = hex2Hsl(colorHex)
 
     if (currentContrastRatio === RATIOS[name]) {
@@ -92,43 +92,44 @@ export function generatePalette(colorHex, bgColor) {
 
     if (bgColorHex === "#000000") {
       if (currentContrastRatio > RATIOS[name]) {
-        while (newContrastRatio > RATIOS[name]) {
-          colorHsl.l = colorHsl.l + 1
+        while (newContrastRatio > RATIOS[name] && colorHsl.l > 0) {
+          colorHsl.l = colorHsl.l - 1
           newColorHex = hsl2Hex(colorHsl)
           newContrastRatio = colorContrastRatioCalculator(bgColorHex, newColorHex).toFixed(1)
         }
         if (newContrastRatio < RATIOS[name]) {
-          colorHsl.l = colorHsl.l - 1
+          colorHsl.l = colorHsl.l + 1
           newColorHex = hsl2Hex(colorHsl)
           newContrastRatio = colorContrastRatioCalculator(bgColorHex, newColorHex).toFixed(1)
         }
       } else {
-        while (newContrastRatio < RATIOS[name]) {
-          colorHsl.l = colorHsl.l - 1
+        while (newContrastRatio < RATIOS[name] && colorHsl.l < 100) {
+          colorHsl.l = colorHsl.l + 1
           newColorHex = hsl2Hex(colorHsl)
           newContrastRatio = colorContrastRatioCalculator(bgColorHex, newColorHex).toFixed(1)
         }
       }
     } else {
       if (currentContrastRatio > RATIOS[name]) {
-        while (newContrastRatio > RATIOS[name]) {
-          colorHsl.l = colorHsl.l - 1
+        while (newContrastRatio > RATIOS[name] && colorHsl.l < 100) {
+          colorHsl.l = colorHsl.l + 1
           newColorHex = hsl2Hex(colorHsl)
           newContrastRatio = colorContrastRatioCalculator(bgColorHex, newColorHex).toFixed(1)
         }
         if (newContrastRatio < RATIOS[name]) {
-          colorHsl.l = colorHsl.l + 1
+          colorHsl.l = colorHsl.l - 1
           newColorHex = hsl2Hex(colorHsl)
           newContrastRatio = colorContrastRatioCalculator(bgColorHex, newColorHex).toFixed(1)
         }
       } else {
-        while (newContrastRatio < RATIOS[name]) {
-          colorHsl.l = colorHsl.l + 1
+        while (newContrastRatio < RATIOS[name] && colorHsl.l > 0) {
+          colorHsl.l = colorHsl.l - 1
           newColorHex = hsl2Hex(colorHsl)
           newContrastRatio = colorContrastRatioCalculator(bgColorHex, newColorHex).toFixed(1)
         }
       }
     }
+    info = `(${newContrastRatio}:1 on background)`
     return paletteColorBuilder(name, newColorHex, info)
   }
 }
