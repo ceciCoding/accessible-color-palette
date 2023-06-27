@@ -1,6 +1,9 @@
-import { rgb2Hsl, hexToRgb, hex2Hsl, hsl2Hex } from 'colorsys'
+// DOCUMENTATION: https://shorturl.at/fgqRW
+import { hex2Hsl } from 'colorsys'
 import { colorContrastRatioCalculator } from '@mdhnpm/color-contrast-ratio-calculator'
 import { darken, illuminate } from './light'
+import { paletteColorBuilder, adjustColor, calculateColor } from './helpers'
+import { validateParams } from './validations'
 
 const RATIOS = {
   100: 4.5,
@@ -21,10 +24,11 @@ const ORIGIN_COLORS = {
 
 let cache = {}
 
-export function generatePalette(colorHex, bgColor) {
-  if (!validateParams()) return null
+export const generatePalette = (colorHex, bgColor) => {
+  if (!validateParams(colorHex, bgColor)) return null
   const cacheKey = `${colorHex}-${bgColor}`
   if (cache[cacheKey]) return cache[cacheKey]
+
   let colors = {
     100: null,
     300: null,
@@ -33,128 +37,45 @@ export function generatePalette(colorHex, bgColor) {
     800: null,
     900: null,
   }
+
   const bgColorHex = bgColor === 'white' ? '#ffffff' : '#000000'
   const currentContrastRatio = colorContrastRatioCalculator(colorHex, bgColorHex).toFixed(1)
+
   colors[700] = get700(colorHex, bgColorHex, currentContrastRatio)
   const paletteColors = ['100', '300', '600', '800', '900'].map((name) => {
-    return colors[name] = getColor(name, bgColorHex)
+    return colors[name] = getPaletteColor(name, bgColorHex, colors[ORIGIN_COLORS[name]].hex)
   })
   cache[cacheKey] = colors
   return colors
-
-
-  function validateParams() {
-    let errorMessage = ''
-
-    if (!colorHex) {
-      errorMessage = 'Missing base color'
-    } else if (!bgColor) {
-      errorMessage = 'Missing contrast color'
-    } else if (!isValidHexColor(colorHex)) {
-      errorMessage = 'Invalid base color. Use a valid hex color'
-    } else if (bgColor !== 'white' && bgColor !== 'black') {
-      errorMessage = 'Invalid contrast color. Use "white" or "black"'
-    }
-
-    if (errorMessage) {
-      console.error('Accessible color palette:', errorMessage)
-      return false
-    }
-
-    return true
-  }
-
-  function getColor(name, bgColor) {
-    let newColor
-    if (name === '100' || name === '300') {
-      bgColor === '#ffffff' ?
-        newColor = illuminate(RATIOS[name], colors[ORIGIN_COLORS[name]].hex) :
-        newColor = darken(RATIOS[name], colors[ORIGIN_COLORS[name]].hex)
-    } else {
-      bgColor === '#ffffff' ?
-        newColor = darken(RATIOS[name], colors[ORIGIN_COLORS[name]].hex) :
-        newColor = illuminate(RATIOS[name], colors[ORIGIN_COLORS[name]].hex)
-    }
-    return paletteColorBuilder(name, newColor.hex, `(${newColor.ratio}:1 on ${ORIGIN_COLORS[name]})`)
-  }
-
-  function get700(colorHex, bgColorHex, currentContrastRatio) {
-    let newColorHex
-    let newContrastRatio = currentContrastRatio
-    const name = "700"
-    let info = `(${RATIOS[name]}:1 on background)`
-    const colorHsl = hex2Hsl(colorHex)
-
-    if (currentContrastRatio === RATIOS[name]) {
-      colors[name] = paletteColorBuilder(name, color, info)
-      return
-    }
-
-    if (bgColorHex === "#000000") {
-      if (currentContrastRatio > RATIOS[name]) {
-        while (newContrastRatio > RATIOS[name] && colorHsl.l > 0) {
-          colorHsl.l = colorHsl.l - 1
-          newColorHex = hsl2Hex(colorHsl)
-          newContrastRatio = colorContrastRatioCalculator(bgColorHex, newColorHex).toFixed(1)
-        }
-        if (newContrastRatio < RATIOS[name]) {
-          colorHsl.l = colorHsl.l + 1
-          newColorHex = hsl2Hex(colorHsl)
-          newContrastRatio = colorContrastRatioCalculator(bgColorHex, newColorHex).toFixed(1)
-        }
-      } else {
-        while (newContrastRatio < RATIOS[name] && colorHsl.l < 100) {
-          colorHsl.l = colorHsl.l + 1
-          newColorHex = hsl2Hex(colorHsl)
-          newContrastRatio = colorContrastRatioCalculator(bgColorHex, newColorHex).toFixed(1)
-        }
-      }
-    } else {
-      if (currentContrastRatio > RATIOS[name]) {
-        while (newContrastRatio > RATIOS[name] && colorHsl.l < 100) {
-          colorHsl.l = colorHsl.l + 1
-          newColorHex = hsl2Hex(colorHsl)
-          newContrastRatio = colorContrastRatioCalculator(bgColorHex, newColorHex).toFixed(1)
-        }
-        if (newContrastRatio < RATIOS[name]) {
-          colorHsl.l = colorHsl.l - 1
-          newColorHex = hsl2Hex(colorHsl)
-          newContrastRatio = colorContrastRatioCalculator(bgColorHex, newColorHex).toFixed(1)
-        }
-      } else {
-        while (newContrastRatio < RATIOS[name] && colorHsl.l > 0) {
-          colorHsl.l = colorHsl.l - 1
-          newColorHex = hsl2Hex(colorHsl)
-          newContrastRatio = colorContrastRatioCalculator(bgColorHex, newColorHex).toFixed(1)
-        }
-      }
-    }
-    info = `(${newContrastRatio}:1 on background)`
-    return paletteColorBuilder(name, newColorHex, info)
-  }
 }
 
-function paletteColorBuilder(name, color, info) {
-  const rgb = hexToRgb(color)
-  if (!rgb) {
-    console.error(`Invalid color: ${color}`)
-    return null
+const get700 = (colorHex, bgColorHex, currentContrastRatio) => {
+  const name = "700"
+  const targetRatio = RATIOS[name]
+  let info = `(${targetRatio}:1 on background)`
+  const colorHsl = hex2Hsl(colorHex)
+
+  if (currentContrastRatio === targetRatio) {
+    colors[name] = paletteColorBuilder(name, colorHex, info)
+    return
   }
-  return {
-    name,
-    rgb,
-    hex: color,
-    hsl: rgb2Hsl(rgb.r, rgb.g, rgb.b),
-    info,
-  }
+
+  const adjustment = bgColorHex === "#000000" ?
+    (currentContrastRatio > targetRatio ? -1 : 1) :
+    (currentContrastRatio > targetRatio ? 1 : -1)
+
+  let { newColorHex, newContrastRatio } = adjustColor(colorHsl, bgColorHex, currentContrastRatio, targetRatio, adjustment)
+
+  info = `(${newContrastRatio}:1 on background)`
+  return paletteColorBuilder(name, newColorHex, info)
 }
 
-
-function isValidHexColor(hex) {
-  if (!hex) return false
-  const regex = /[0-9A-Fa-f]{6}/g
-  return Boolean(hex.match(regex))
+const getPaletteColor = (name, bgColor, originColor) => {
+  const action = (name === '100' || name === '300') ? [illuminate, darken] : [darken, illuminate]
+  const newColor = calculateColor(...action, RATIOS[name], originColor, bgColor)
+  return paletteColorBuilder(name, newColor.hex, `(${newColor.ratio}:1 on ${ORIGIN_COLORS[name]})`)
 }
+
 
 
 
