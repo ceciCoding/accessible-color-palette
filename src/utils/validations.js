@@ -10,6 +10,7 @@ const validatePaletteArgs = (colorHex, bgColor) => {
 }
 
 const isValidHexColor = hex => {
+  if (typeof hex !== "string") return false
   if (!hex) return false
   const regex = /^#[0-9A-Fa-f]{6}$/g
   //for valid hex colors like #000, #fff, #aaa, etc
@@ -62,6 +63,32 @@ const validatePaletteColorBuilderArgs = (name, color, info) => {
   return true
 }
 
+const validateLightArgs = (desiredContrastRatio, colorHex) => {
+  const validations = [
+    {
+      condition: !desiredContrastRatio || !colorHex,
+      errorMessage: 'Missing arguments. Pass desired contrast ratio and color hex'
+    },
+    {
+      condition: !isValidHexColor(colorHex),
+      errorMessage: `Invalid color: ${colorHex}`
+    },
+    {
+      condition: typeof desiredContrastRatio !== "number",
+      errorMessage: 'Wrong type. Desired contrast ratio should be a number'
+    },
+  ]
 
-export { validatePaletteArgs, isBgColorValid, isValidHexColor, getErrorMessage, validatePaletteColorBuilderArgs }
+  for (let validation of validations) {
+    if (validation.condition) {
+      console.error(validation.errorMessage)
+      return false
+    }
+  }
+
+  return true
+}
+
+
+export { validatePaletteArgs, isBgColorValid, isValidHexColor, getErrorMessage, validatePaletteColorBuilderArgs, validateLightArgs }
 

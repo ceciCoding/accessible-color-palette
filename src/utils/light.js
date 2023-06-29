@@ -1,8 +1,11 @@
 
 import { hsl2Hex, hex2Hsl } from 'colorsys'
 import { colorContrastRatioCalculator } from '@mdhnpm/color-contrast-ratio-calculator'
+import { validateLightArgs } from './validations'
 
 export const darken = (desiredContrastRatio, colorHex) => {
+  if (!validateLightArgs(desiredContrastRatio, colorHex)) return null
+
   let newColorHex
   let currentContrastRatio = 1
   const colorHsl = hex2Hsl(colorHex)
@@ -16,6 +19,8 @@ export const darken = (desiredContrastRatio, colorHex) => {
 }
 
 export const illuminate = (desiredContrastRatio, colorHex) => {
+  if (!validateLightArgs(desiredContrastRatio, colorHex)) return null
+
   let newColorHex
   let currentContrastRatio = 1
   const colorHsl = hex2Hsl(colorHex)
