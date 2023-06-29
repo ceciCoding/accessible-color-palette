@@ -1,4 +1,4 @@
-export const validateParams = (colorHex, bgColor) => {
+const validateParams = (colorHex, bgColor) => {
   const errorMessage = getErrorMessage(colorHex, bgColor)
 
   if (errorMessage) {
@@ -11,9 +11,11 @@ export const validateParams = (colorHex, bgColor) => {
 
 const isValidHexColor = hex => {
   if (!hex) return false
-  const regex = /[0-9A-Fa-f]{6}/g
-  return Boolean(hex.match(regex))
+  const regex = /^#[0-9A-Fa-f]{6}$/g
+  const simplifiedRegex = /^#([0-9A-Fa-f])\1\1$/gi;
+  return Boolean(hex.match(regex) || hex.match(simplifiedRegex))
 }
+
 
 const isBgColorValid = bgColor => {
   return bgColor === 'white' || bgColor === 'black'
@@ -38,4 +40,6 @@ const getErrorMessage = (colorHex, bgColor) => {
 
   return ''
 }
+
+export { validateParams, isBgColorValid, isValidHexColor, getErrorMessage }
 
