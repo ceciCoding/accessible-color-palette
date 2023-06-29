@@ -3,7 +3,7 @@ import { hex2Hsl } from 'colorsys'
 import { colorContrastRatioCalculator } from '@mdhnpm/color-contrast-ratio-calculator'
 import { darken, illuminate } from './light'
 import { paletteColorBuilder, adjustColor, calculateColor } from './helpers'
-import { validateParams } from './validations'
+import { validatePaletteArgs } from './validations'
 
 const RATIOS = {
   100: 4.5,
@@ -25,7 +25,7 @@ const ORIGIN_COLORS = {
 let cache = {}
 
 export const generatePalette = (colorHex, bgColor) => {
-  if (!validateParams(colorHex, bgColor)) return null
+  if (!validatePaletteArgs(colorHex, bgColor)) return null
   const cacheKey = `${colorHex}-${bgColor}`
   if (cache[cacheKey]) return cache[cacheKey]
 

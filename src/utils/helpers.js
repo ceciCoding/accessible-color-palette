@@ -2,6 +2,7 @@ import { hsl2Hex, hexToRgb, rgb2Hsl } from 'colorsys'
 import { colorContrastRatioCalculator } from '@mdhnpm/color-contrast-ratio-calculator'
 
 export const paletteColorBuilder = (name, color, info) => {
+  if (!validatePaletteColorBuilderArgs(name, color, info)) return null
   const rgb = hexToRgb(color)
   if (!rgb) {
     console.error(`Invalid color: ${color}`)
@@ -25,6 +26,7 @@ export const adjustColor = (colorHsl, bgColorHex, currentContrastRatio, targetRa
     newContrastRatio = colorContrastRatioCalculator(bgColorHex, newColorHex).toFixed(1)
   }
 
+  // if resultant ratio after loop is less than target ratio
   if (newContrastRatio < targetRatio && colorHsl.l >= 0 && colorHsl.l <= 100) {
     adjustment = bgColorHex === "#000000" ? 1 : -1
     colorHsl.l += adjustment

@@ -1,52 +1,68 @@
 import {
-  validateParams,
+  validatePaletteArgs,
   isValidHexColor,
   isBgColorValid,
-  getErrorMessage
+  getErrorMessage,
+  validatePaletteColorBuilderArgs
 } from '../src/utils/validations'
 
+const validHexColors = ['#fcba03', '#388a65', '#6d8ccf', '#257a1f', '#2d7fbd', '#000', '#aaa']
+const validBgColors = ['black', 'white']
+const invalidHexColors = ['notAColor', '#56hppa', '#909', 'test', '#fff1az', '>_%&']
+const invalidBgColors = ['notAValidValue', 'thing', '#000000', 'wite', '>_%&']
+
 describe('Validation tests', () => {
-  describe('validateParams function', () => {
-    test('it returns true with correct parameters and white', () => {
-      const colors = ['#fcba03', '#388a65', '#6d8ccf', '#257a1f', '#2d7fbd']
-      colors.forEach(color => {
-        expect(validateParams(color, 'white')).toBe(true)
+  describe('validatePaletteArgs function', () => {
+    test('it returns true with correct arguments and white', () => {
+      validHexColors.forEach(color => {
+        expect(validatePaletteArgs(color, 'white')).toBe(true)
       })
     })
 
-    test('it returns true with correct parameters and black', () => {
-      const colors = ['#bd2d2d', '#ed58a7', '#58edbb', '#204f3f']
-      colors.forEach(color => {
-        expect(validateParams(color, 'black')).toBe(true)
+    test('it returns true with correct arguments and black', () => {
+      validHexColors.forEach(color => {
+        expect(validatePaletteArgs(color, 'black')).toBe(true)
       })
     })
 
     test('it returns false with incorrect color hex', () => {
-      const incorrectParams = ['notAColor', '#56hppa', '#909', 'test', '#fff1az']
-      incorrectParams.forEach(param => {
-        expect(validateParams(param, 'white')).toBe(false)
+      invalidHexColors.forEach(param => {
+        expect(validatePaletteArgs(param, 'white')).toBe(false)
       })
     })
 
     test('it returns false with incorrect bg color', () => {
-      const incorrectParams = ['notAValidValue', 'thing', '#000000', 'wite']
-      incorrectParams.forEach(param => {
-        expect(validateParams('#fcba03', param)).toBe(false)
+      invalidBgColors.forEach(param => {
+        expect(validatePaletteArgs('#fcba03', param)).toBe(false)
+      })
+    })
+
+    test('it logs an error to the console if invalid color hex', () => {
+      const logSpy = jest.spyOn(global.console, 'error')
+      invalidHexColors.forEach(color => {
+        validatePaletteArgs(color, 'white')
+        expect(logSpy).toHaveBeenCalledWith('Accessible color palette: Invalid base color. Use a valid hex color')
+      })
+    })
+
+    test('it logs an error to the console if invalid bg color', () => {
+      const logSpy = jest.spyOn(global.console, 'error')
+      invalidBgColors.forEach(color => {
+        validatePaletteArgs(color, 'white')
+        expect(logSpy).toHaveBeenCalledWith('Accessible color palette: Invalid base color. Use a valid hex color')
       })
     })
   })
 
   describe('isValidHexColor function', () => {
     test('it returns true when passed valid hex color', () => {
-      const validColors = ['#fcba03', '#388a65', '#6d8ccf', '#257a1f', '#2d7fbd', '#000', '#aaa']
-      validColors.forEach(color => {
+      validHexColors.forEach(color => {
         expect(isValidHexColor(color)).toBe(true)
       })
     })
 
     test('it returns false when passed invalid hex color', () => {
-      const invalidColors = ['notAColor', '#56hppa', '#909', '#fff1az', '#11112o', '#123457678', null]
-      invalidColors.forEach(color => {
+      invalidHexColors.forEach(color => {
         expect(isValidHexColor(color)).toBe(false)
       })
     })
@@ -54,14 +70,13 @@ describe('Validation tests', () => {
 
   describe('isBgColorValid function', () => {
     test('it returns true for correct bg color', () => {
-      const validBgColors = ['black', 'white']
       validBgColors.forEach(color => {
         expect(isBgColorValid(color)).toBe(true)
       })
     })
 
 
-    test('it returns true for incorrect bg color', () => {
+    test('it returns false for incorrect bg color', () => {
       const validBgColors = ['blue', 'green', '#000000', '#ffffff']
       validBgColors.forEach(color => {
         expect(isBgColorValid(color)).toBe(false)
@@ -79,17 +94,64 @@ describe('Validation tests', () => {
     })
 
     test('it returns correct error with invalid color hex passed', () => {
-      const invalidHex = ['thing', '#8999', '#123457678', '#122', '#56hppa']
-      invalidHex.forEach(hex => {
+      invalidHexColors.forEach(hex => {
         expect(getErrorMessage(hex, 'white')).toBe('Invalid base color. Use a valid hex color')
       })
     })
 
     test('it returns correct error with invalid bg color passed', () => {
-      const invalidBgColors = ['blue', 'green', '#000000', '#ffffff']
       invalidBgColors.forEach(color => {
         expect(getErrorMessage('#aaaaaa', color)).toBe('Invalid contrast color. Use "white" or "black"')
       })
+    })
+  })
+
+  describe('validatePaletteColorBuilderArgs function', () => {
+    test('it returns true with valid arguments', () => {
+      expect(validatePaletteColorBuilderArgs('name', '#aaaaaa', 'info')).toBe(true)
+    })
+
+    test('it returns false with no arguments', () => {
+      expect(validatePaletteColorBuilderArgs()).toBe(false)
+    })
+
+    test('it returns false with no name or wrong type', () => {
+      const invalidArgs = [undefined, null, 123, '']
+      invalidArgs.forEach(param => {
+        expect(validatePaletteColorBuilderArgs(param, '#aaaaaa', 'info')).toBe(false)
+      })
+    })
+
+    test('it returns false with no color or wrong type', () => {
+      const invalidArgs = [undefined, null, 123, '']
+      invalidArgs.forEach(param => {
+        expect(validatePaletteColorBuilderArgs('name', param, 'info')).toBe(false)
+      })
+    })
+
+    test('it returns false with no info or wrong type', () => {
+      const invalidArgs = [undefined, null, 123, '']
+      invalidArgs.forEach(param => {
+        expect(validatePaletteColorBuilderArgs('700', '#aaaaaa', param)).toBe(false)
+      })
+    })
+
+    test('it logs an error to the console if no name', () => {
+      const logSpy = jest.spyOn(global.console, 'error')
+      validatePaletteColorBuilderArgs('', '#aaaaaa', 'info')
+      expect(logSpy).toHaveBeenCalledWith('Missing name')
+    })
+
+    test('it logs an error to the console if no color', () => {
+      const logSpy = jest.spyOn(global.console, 'error')
+      validatePaletteColorBuilderArgs('700', '', 'info')
+      expect(logSpy).toHaveBeenCalledWith('Missing name')
+    })
+
+    test('it logs an error to the console if no info', () => {
+      const logSpy = jest.spyOn(global.console, 'error')
+      validatePaletteColorBuilderArgs('700', '#aaaaaa', '')
+      expect(logSpy).toHaveBeenCalledWith('Missing name')
     })
   })
 })
