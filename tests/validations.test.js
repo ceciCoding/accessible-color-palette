@@ -211,5 +211,11 @@ describe('Validation tests', () => {
       validateLightArgs()
       expect(logSpy).toHaveBeenCalledWith('Missing arguments. Pass desired contrast ratio and color hex')
     })
+
+    test('it logs an error to the console when missing one argument', () => {
+      const logSpy = jest.spyOn(global.console, 'error')
+      validateLightArgs(1.6)
+      expect(logSpy).toHaveBeenCalledWith('Missing arguments. Pass desired contrast ratio and color hex')
+    })
   })
 })
