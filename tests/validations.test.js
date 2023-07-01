@@ -149,73 +149,83 @@ describe('Validation tests', () => {
       expect(validatePaletteColorBuilderArgs('name', '#aaaaaa', 'info')).toBe(true)
     })
 
-    test('it returns false with no arguments', () => {
-      expect(validatePaletteColorBuilderArgs()).toBe(false)
+    test('it throws error with no arguments', () => {
+      expect(() => {
+        validatePaletteColorBuilderArgs()
+      }).toThrow()
     })
 
-    test('it returns false with no name or wrong type', () => {
+    test('it throws an error with no name or wrong type', () => {
       const invalidArgs = [undefined, null, 123, '']
       invalidArgs.forEach(param => {
-        expect(validatePaletteColorBuilderArgs(param, '#aaaaaa', 'info')).toBe(false)
+        expect(() => {
+          validatePaletteColorBuilderArgs(param, '#aaaaaa', 'info')
+        }).toThrow()
       })
     })
 
-    test('it returns false with no color or wrong type', () => {
+    test('it throws an error with no color or wrong type', () => {
       const invalidArgs = [undefined, null, 123, '']
       invalidArgs.forEach(param => {
-        expect(validatePaletteColorBuilderArgs('name', param, 'info')).toBe(false)
+        expect(() => {
+          validatePaletteColorBuilderArgs('name', param, 'info')
+        }).toThrow()
       })
     })
 
-    test('it returns false with no info or wrong type', () => {
+    test('it throws an error with no info or wrong type', () => {
       const invalidArgs = [undefined, null, 123, '']
       invalidArgs.forEach(param => {
-        expect(validatePaletteColorBuilderArgs('700', '#aaaaaa', param)).toBe(false)
+        expect(() => {
+          validatePaletteColorBuilderArgs('700', '#aaaaaa', param)
+        }).toThrow()
       })
     })
 
-    test('it logs an error to the console if no name', () => {
-      const logSpy = jest.spyOn(global.console, 'error')
-      validatePaletteColorBuilderArgs('', '#aaaaaa', 'info')
-      expect(logSpy).toHaveBeenCalledWith('Missing name')
+    test('it throws an error if no name', () => {
+      expect(() => {
+        validatePaletteColorBuilderArgs('', '#aaaaaa', 'info')
+      }).toThrow(new Error('Missing name'))
     })
 
-    test('it logs an error to the console if no color', () => {
-      const logSpy = jest.spyOn(global.console, 'error')
-      validatePaletteColorBuilderArgs('700', '', 'info')
-      expect(logSpy).toHaveBeenCalledWith('Missing color')
+    test('it throws an error if no color', () => {
+      expect(() => {
+        validatePaletteColorBuilderArgs('700', '', 'info')
+      }).toThrow(new Error('Missing color'))
     })
 
-    test('it logs an error to the console if no info', () => {
-      const logSpy = jest.spyOn(global.console, 'error')
-      validatePaletteColorBuilderArgs('700', '#aaaaaa', '')
-      expect(logSpy).toHaveBeenCalledWith('Missing info')
+    test('it throws an error if no info', () => {
+      expect(() => {
+        validatePaletteColorBuilderArgs('700', '#aaaaaa', '')
+      }).toThrow(new Error('Missing info'))
     })
   })
 
   describe('validateLightArgs function', () => {
     test('returns true when all args are valid', () => {
-      validLightArgs.forEach(args => {
-        expect(validateLightArgs(args.ratio, args.hex)).toBe(true)
+      validLightArgs.forEach(arg => {
+        expect(validateLightArgs(arg.ratio, arg.hex)).toBe(true)
       })
     })
 
-    test('it returns false when args are invalid', () => {
+    test('it throws an error when args are invalid', () => {
       invalidLightArgs.forEach(args => {
-        expect(validateLightArgs(args.ratio, args.hex)).toBe(false)
+        expect(() => {
+          validateLightArgs(args.ratio, args.hex)
+        }).toThrow()
       })
     })
 
-    test('it logs an error to the console when missing both arguments', () => {
-      const logSpy = jest.spyOn(global.console, 'error')
-      validateLightArgs()
-      expect(logSpy).toHaveBeenCalledWith('Missing arguments. Pass desired contrast ratio and color hex')
+    test('it throws an error when missing both arguments', () => {
+      expect(() => {
+        validateLightArgs()
+      }).toThrow(new Error('Missing arguments. Pass desired contrast ratio and color hex'))
     })
 
-    test('it logs an error to the console when missing one argument', () => {
-      const logSpy = jest.spyOn(global.console, 'error')
-      validateLightArgs(1.6)
-      expect(logSpy).toHaveBeenCalledWith('Missing arguments. Pass desired contrast ratio and color hex')
+    test('it throws an error when missing one argument', () => {
+      expect(() => {
+        validateLightArgs(1.6)
+      }).toThrow(new Error('Missing arguments. Pass desired contrast ratio and color hex'))
     })
   })
 })

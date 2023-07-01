@@ -50,13 +50,11 @@ const validatePaletteColorBuilderArgs = (name, color, info) => {
 
   for (const key in parameters) {
     if (typeof parameters[key] !== "string") {
-      console.error('Wrong type. All Args for validatePaletteColorBuilderArgs should be strings')
-      return false
+      throw new Error('Wrong type. All Args for validatePaletteColorBuilderArgs should be strings')
     }
 
     if (!parameters[key]) {
-      console.error(messages[key])
-      return false
+      throw new Error(messages[key])
     }
   }
 
@@ -81,8 +79,7 @@ const validateLightArgs = (desiredContrastRatio, colorHex) => {
 
   for (let validation of validations) {
     if (validation.condition) {
-      console.error(validation.errorMessage)
-      return false
+      throw new Error(validation.errorMessage)
     }
   }
 
