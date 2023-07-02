@@ -1,5 +1,6 @@
 import { hsl2Hex, hexToRgb, rgb2Hsl } from 'colorsys'
 import { colorContrastRatioCalculator } from '@mdhnpm/color-contrast-ratio-calculator'
+import { validatePaletteColorBuilderArgs } from './validations'
 
 export const paletteColorBuilder = (name, color, info) => {
   if (!validatePaletteColorBuilderArgs(name, color, info)) return null

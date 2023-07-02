@@ -29,14 +29,7 @@ export const generatePalette = (colorHex, bgColor) => {
   const cacheKey = `${colorHex}-${bgColor}`
   if (cache[cacheKey]) return cache[cacheKey]
 
-  let colors = {
-    100: null,
-    300: null,
-    600: null,
-    700: null,
-    800: null,
-    900: null,
-  }
+  let colors = {}
 
   const bgColorHex = bgColor === 'white' ? '#ffffff' : '#000000'
   const currentContrastRatio = colorContrastRatioCalculator(colorHex, bgColorHex).toFixed(1)

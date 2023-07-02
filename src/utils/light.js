@@ -15,7 +15,7 @@ export const darken = (desiredContrastRatio, colorHex) => {
     newColorHex = hsl2Hex(colorHsl)
     currentContrastRatio = colorContrastRatioCalculator(colorHex, newColorHex).toFixed(1)
   }
-  return { hex: newColorHex, ratio: currentContrastRatio }
+  return { hex: newColorHex, ratio: Number(currentContrastRatio) }
 }
 
 export const illuminate = (desiredContrastRatio, colorHex) => {
@@ -30,7 +30,7 @@ export const illuminate = (desiredContrastRatio, colorHex) => {
     newColorHex = hsl2Hex(colorHsl)
     currentContrastRatio = colorContrastRatioCalculator(colorHex, newColorHex).toFixed(1)
   }
-  return { hex: newColorHex, ratio: currentContrastRatio }
+  return { hex: newColorHex, ratio: Number(currentContrastRatio) }
 }
 
 
