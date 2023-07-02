@@ -6,15 +6,16 @@ import {
 
 import { hexToRgb, rgb2Hsl } from 'colorsys'
 
+const info = 'some text'
 
 const validPaletteBuilderArgs = [
-  { name: '100', color: '#1A6646', info: 'some text' },
-  { name: '200', color: '#AC9FE4', info: 'some text' },
-  { name: '300', color: '#DD45AA', info: 'some text' },
-  { name: '400', color: '#00BAF5', info: 'some text' },
-  { name: '500', color: '#1C734E', info: 'some text' },
-  { name: '600', color: '#8FFFA3', info: 'some text' },
-  { name: '700', color: '#FF9161', info: 'some text' },
+  { name: '100', color: '#1A6646', info },
+  { name: '200', color: '#AC9FE4', info },
+  { name: '300', color: '#DD45AA', info },
+  { name: '400', color: '#00BAF5', info },
+  { name: '500', color: '#1C734E', info },
+  { name: '600', color: '#8FFFA3', info },
+  { name: '700', color: '#FF9161', info },
 ]
 
 describe('Helper functions', () => {

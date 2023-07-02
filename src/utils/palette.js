@@ -24,19 +24,27 @@ const ORIGIN_COLORS = {
 
 let cache = {}
 
-export const generatePalette = (colorHex, bgColor) => {
+const generatePalette = (colorHex, bgColor) => {
   if (!validatePaletteArgs(colorHex, bgColor)) return null
+
+  //check for short hex like #000 or #aaa. colorContrastRatioCalculator requires full hex
+  if (colorHex.length === 4) {
+    colorHex = colorHex[0] + colorHex[1].repeat(6)
+  }
+
   const cacheKey = `${colorHex}-${bgColor}`
   if (cache[cacheKey]) return cache[cacheKey]
 
   let colors = {}
-
   const bgColorHex = bgColor === 'white' ? '#ffffff' : '#000000'
   const currentContrastRatio = colorContrastRatioCalculator(colorHex, bgColorHex).toFixed(1)
 
   colors[700] = get700(colorHex, bgColorHex, currentContrastRatio)
+
+  //the order is important
   const paletteColors = ['100', '300', '600', '800', '900'].map((name) => {
-    return colors[name] = getPaletteColor(name, bgColorHex, colors[ORIGIN_COLORS[name]].hex)
+    const localHex = colors[ORIGIN_COLORS[name]].hex
+    return colors[name] = getPaletteColor(name, bgColorHex, localHex)
   })
   cache[cacheKey] = colors
   return colors
@@ -69,7 +77,7 @@ const getPaletteColor = (name, bgColor, originColor) => {
   return paletteColorBuilder(name, newColor.hex, `(${newColor.ratio}:1 on ${ORIGIN_COLORS[name]})`)
 }
 
-export { RATIOS, generatePalette, get700, getPaletteColor }
+export { generatePalette, get700, getPaletteColor }
 
 
 

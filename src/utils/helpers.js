@@ -2,7 +2,7 @@ import { hsl2Hex, hexToRgb, rgb2Hsl } from 'colorsys'
 import { colorContrastRatioCalculator } from '@mdhnpm/color-contrast-ratio-calculator'
 import { validatePaletteColorBuilderArgs } from './validations'
 
-export const paletteColorBuilder = (name, color, info) => {
+const paletteColorBuilder = (name, color, info) => {
   if (!validatePaletteColorBuilderArgs(name, color, info)) return null
   const rgb = hexToRgb(color)
   if (!rgb) {
@@ -18,7 +18,7 @@ export const paletteColorBuilder = (name, color, info) => {
   }
 }
 
-export const adjustColor = (colorHsl, bgColorHex, currentContrastRatio, targetRatio, adjustment) => {
+const adjustColor = (colorHsl, bgColorHex, currentContrastRatio, targetRatio, adjustment) => {
   let newColorHex, newContrastRatio = currentContrastRatio
 
   while (Math.abs(newContrastRatio - targetRatio) > 0.1 && colorHsl.l >= 0 && colorHsl.l <= 100) {
@@ -41,6 +41,8 @@ export const adjustColor = (colorHsl, bgColorHex, currentContrastRatio, targetRa
   }
 }
 
-export const calculateColor = (action1, action2, ratio, color, bgColor) => {
+const calculateColor = (action1, action2, ratio, color, bgColor) => {
   return bgColor === '#ffffff' ? action1(ratio, color) : action2(ratio, color)
 }
+
+export { calculateColor, paletteColorBuilder, adjustColor }

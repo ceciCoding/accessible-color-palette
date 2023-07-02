@@ -27,6 +27,7 @@ const getErrorMessage = (colorHex, bgColor) => {
   const checks = {
     'Missing base color': colorHex,
     'Missing contrast color': bgColor,
+    // 'Wrong color hex format. Format "#aaaaaa" is expected.': colorHex.charAt(0) !== '#',
     'Invalid base color. Use a valid hex color': isValidHexColor(colorHex),
     'Invalid contrast color. Use "white" or "black"': isBgColorValid(bgColor),
   }
