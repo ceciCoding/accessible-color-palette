@@ -49,12 +49,11 @@ const validatePaletteColorBuilderArgs = (name, color, info) => {
   }
 
   for (const key in parameters) {
-    if (typeof parameters[key] !== "string") {
-      throw new Error('Wrong type. All Args for validatePaletteColorBuilderArgs should be strings')
-    }
-
     if (!parameters[key]) {
       throw new Error(messages[key])
+    }
+    if (typeof parameters[key] !== "string") {
+      throw new Error('Wrong type. All Args for validatePaletteColorBuilderArgs should be strings')
     }
   }
 

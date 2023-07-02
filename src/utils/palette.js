@@ -69,6 +69,7 @@ const getPaletteColor = (name, bgColor, originColor) => {
   return paletteColorBuilder(name, newColor.hex, `(${newColor.ratio}:1 on ${ORIGIN_COLORS[name]})`)
 }
 
+export { RATIOS, generatePalette, get700, getPaletteColor }
 
 
 

@@ -1,0 +1,1 @@
+import { RATIOS, generatePalette, get700, getPaletteColor } from '../src/utils/palette'
