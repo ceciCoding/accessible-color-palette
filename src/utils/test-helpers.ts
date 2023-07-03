@@ -1,4 +1,4 @@
-import { BgColor, LightArg, RatiosObj, FinalPaletteRatios, Shade } from "../types"
+import { BgColor, LightResult, RatiosObj, FinalPaletteRatios, Shade } from "../types"
 
 const VALID_HEX_COLORS: string[] = ['#1A6646', '#AC9FE4', '#DD45AA', '#00BAF5', '#1C734E', '#8FFFA3', '#FF9161', '#1145F8', '#2d7fbd', '#000', '#aaa']
 
@@ -8,7 +8,7 @@ const INVALID_HEX_COLORS: string[] = ['notAColor', '#56hppa', '#909', 'test', '#
 
 const INVALID_BG_COLORS: string[] = ['notAValidValue', 'thing', '#000000', 'wite', '>_%&']
 
-const VALID_LIGHT_ARGS: LightArg[] = [
+const VALID_LIGHT_ARGS: LightResult[] = [
   { ratio: 1.5, hex: '#aaaaaa' },
   { ratio: 2.9, hex: '#afafaf' },
   { ratio: 3.4, hex: '#12afaf' },
