@@ -1,7 +1,7 @@
 import { BgColor, Validation } from "../types"
 
 const validatePaletteArgs = (colorHex: string, bgColor: BgColor): boolean => {
-  const errorMessage: boolean | string = getErrorMessage(colorHex, bgColor)
+  const errorMessage: string | null = getErrorMessage(colorHex, bgColor)
 
   if (errorMessage) {
     console.error(`Accessible color palette: ${errorMessage}`)
@@ -25,33 +25,22 @@ const isBgColorValid = (bgColor: BgColor): boolean => {
   return bgColor === 'white' || bgColor === 'black'
 }
 
-const getErrorMessage = (colorHex: string, bgColor: BgColor): boolean | string => {
-  const validations: Validation[] = [
-    {
-      condition: !colorHex,
-      errorMessage: 'Missing base color'
-    },
-    {
-      condition: !bgColor,
-      errorMessage: 'Missing contrast color'
-    },
-    {
-      condition: !isValidHexColor(colorHex),
-      errorMessage: 'Invalid base color. Use a valid hex color'
-    },
-    {
-      condition: !isBgColorValid(bgColor),
-      errorMessage: 'Invalid contrast color. Use "white" or "black"'
-    }
-  ]
+const getErrorMessage = (colorHex, bgColor) => {
+  const checks: any = {
+    'Missing base color': colorHex,
+    'Missing contrast color': bgColor,
+    // 'Wrong color hex format. Format "#aaaaaa" is expected.': colorHex.charAt(0) !== '#',
+    'Invalid base color. Use a valid hex color': isValidHexColor(colorHex),
+    'Invalid contrast color. Use "white" or "black"': isBgColorValid(bgColor),
+  }
 
-  for (let validation of validations) {
-    if (validation.condition) {
-      return validation.message
+  for (const message in checks) {
+    if (!checks[message]) {
+      return message
     }
   }
 
-  return true
+  return null
 }
 
 const validatePaletteColorBuilderArgs = (name: string, color: string, info: string): boolean | Error => {
