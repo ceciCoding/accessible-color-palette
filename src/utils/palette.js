@@ -3,7 +3,7 @@ import { hex2Hsl } from 'colorsys'
 import { colorContrastRatioCalculator } from '@mdhnpm/color-contrast-ratio-calculator'
 import { darken, illuminate } from './light'
 import { paletteColorBuilder, adjustColor, calculateColor } from './helpers'
-import { validateParams } from './validations'
+import { validatePaletteArgs } from './validations'
 
 const RATIOS = {
   100: 4.5,
@@ -24,26 +24,27 @@ const ORIGIN_COLORS = {
 
 let cache = {}
 
-export const generatePalette = (colorHex, bgColor) => {
-  if (!validateParams(colorHex, bgColor)) return null
+const generatePalette = (colorHex, bgColor) => {
+  if (!validatePaletteArgs(colorHex, bgColor)) return null
+
+  //check for short hex like #000 or #aaa. colorContrastRatioCalculator requires full hex
+  if (colorHex.length === 4) {
+    colorHex = colorHex[0] + colorHex[1].repeat(6)
+  }
+
   const cacheKey = `${colorHex}-${bgColor}`
   if (cache[cacheKey]) return cache[cacheKey]
 
-  let colors = {
-    100: null,
-    300: null,
-    600: null,
-    700: null,
-    800: null,
-    900: null,
-  }
-
+  let colors = {}
   const bgColorHex = bgColor === 'white' ? '#ffffff' : '#000000'
   const currentContrastRatio = colorContrastRatioCalculator(colorHex, bgColorHex).toFixed(1)
 
   colors[700] = get700(colorHex, bgColorHex, currentContrastRatio)
+
+  //the order is important
   const paletteColors = ['100', '300', '600', '800', '900'].map((name) => {
-    return colors[name] = getPaletteColor(name, bgColorHex, colors[ORIGIN_COLORS[name]].hex)
+    const localHex = colors[ORIGIN_COLORS[name]].hex
+    return colors[name] = getPaletteColor(name, bgColorHex, localHex)
   })
   cache[cacheKey] = colors
   return colors
@@ -76,6 +77,7 @@ const getPaletteColor = (name, bgColor, originColor) => {
   return paletteColorBuilder(name, newColor.hex, `(${newColor.ratio}:1 on ${ORIGIN_COLORS[name]})`)
 }
 
+export { generatePalette, get700, getPaletteColor }
 
 
 
