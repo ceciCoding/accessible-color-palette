@@ -24,6 +24,8 @@ const COLOR_NAMES = ['100', '300', '600', '700', '800', '900']
 
 const ratios = { '100': 4.5, '300': 3.1, '600': 3.1, '700': 5.1, '800': 3.1, '900': 3.1 }
 
+/*the palette doesn't need to have the exact ratios as the target ones,
+but they have to be close and never be less*/
 const FINAL_PALETTE_VALID_RATIOS = COLOR_NAMES.reduce((acc, colorName) => {
   acc[colorName] = getValidRatios(ratios[colorName])
   return acc

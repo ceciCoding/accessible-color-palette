@@ -13,10 +13,13 @@ describe('palette functions', () => {
       VALID_HEX_COLORS.forEach(color => {
         const result = generatePalette(color, getRandomBgColor())
         COLOR_NAMES.forEach(name => {
-          const containsCorrectRatio = FINAL_PALETTE_VALID_RATIOS[name].some(ratio => result[name].info.includes(ratio.toString()))
+          const containsCorrectRatio =
+            FINAL_PALETTE_VALID_RATIOS[name]
+              .some(ratio => result[name].info.includes(ratio.toString()))
           expect(containsCorrectRatio).toBe(true)
         })
       })
     })
   })
+  // TO-DO: Write tests for the rest of the palette functions
 })
