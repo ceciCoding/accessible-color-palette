@@ -25,7 +25,7 @@ const isBgColorValid = (bgColor: BgColor): boolean => {
   return bgColor === 'white' || bgColor === 'black'
 }
 
-const getErrorMessage = (colorHex, bgColor) => {
+const getErrorMessage = (colorHex: string, bgColor: BgColor): string | null => {
   const checks: any = {
     'Missing base color': colorHex,
     'Missing contrast color': bgColor,
