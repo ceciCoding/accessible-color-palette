@@ -65,16 +65,17 @@ const get700 = (colorHex, bgColorHex, currentContrastRatio) => {
     (currentContrastRatio > targetRatio ? -1 : 1) :
     (currentContrastRatio > targetRatio ? 1 : -1)
 
-  let { newColorHex, newContrastRatio } = adjustColor(colorHsl, bgColorHex, currentContrastRatio, targetRatio, adjustment)
+  let { hex, ratio } = adjustColor(colorHsl, bgColorHex, currentContrastRatio, targetRatio, adjustment)
 
-  info = `(${newContrastRatio}:1 on background)`
-  return paletteColorBuilder(name, newColorHex, info)
+  info = `(${ratio}:1 on background)`
+  return paletteColorBuilder(name, hex, info)
 }
 
 const getPaletteColor = (name, bgColor, originColor) => {
   const action = (name === '100' || name === '300') ? [illuminate, darken] : [darken, illuminate]
   const newColor = calculateColor(...action, RATIOS[name], originColor, bgColor)
-  return paletteColorBuilder(name, newColor.hex, `(${newColor.ratio}:1 on ${ORIGIN_COLORS[name]})`)
+  const info = `(${newColor.ratio}:1 on ${ORIGIN_COLORS[name]})`
+  return paletteColorBuilder(name, newColor.hex, info)
 }
 
 export { generatePalette, get700, getPaletteColor }
