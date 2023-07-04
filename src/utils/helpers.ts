@@ -1,7 +1,8 @@
-import { PaletteColor, RGBColor, LightResult, HSLColor, adjustment } from '../types'
+import { PaletteColor, RGBColor, LightResult, HSLColor, Adjustment } from '../types'
 import { hsl2Hex, hexToRgb, rgb2Hsl } from 'colorsys'
 import { colorContrastRatioCalculator } from '@mdhnpm/color-contrast-ratio-calculator'
 import { validatePaletteColorBuilderArgs } from './validations'
+import { darken, illuminate } from './light'
 
 const paletteColorBuilder = (name: string, color: string, info: string): PaletteColor => {
   if (!validatePaletteColorBuilderArgs(name, color, info)) return null
@@ -24,7 +25,7 @@ const adjustColor = (
   bgColorHex: string,
   currentContrastRatio: number,
   targetRatio: number,
-  adjustment: adjustment
+  adjustment: Adjustment
 ): LightResult => {
 
   let newColorHex
@@ -55,8 +56,8 @@ const adjustColor = (
 }
 
 const calculateColor = (
-  action1: any,
-  action2: any,
+  action1: (ratio: number, color: string) => LightResult,
+  action2: (ratio: number, color: string) => LightResult,
   ratio: number,
   color: string,
   bgColor: string

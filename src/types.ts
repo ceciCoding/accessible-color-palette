@@ -1,8 +1,10 @@
 export type BgColor = 'white' | 'black'
 
+export type BgColorHex = '#000000' | '#ffffff'
+
 export type Shade = '100' | '300' | '600' | '700' | '800' | '900'
 
-export type adjustment = 1 | -1
+export type Adjustment = 1 | -1
 
 type HSL = 'h' | 's' | 'l'
 
@@ -18,10 +20,6 @@ export interface LightResult {
   hex: string
 }
 
-export interface FinalPaletteRatios {
-  [key: string]: number[]
-}
-
 export interface PaletteColor {
   name: string
   rgb: Record<RGB, number>
@@ -30,7 +28,9 @@ export interface PaletteColor {
   info: string
 }
 
-export type RatiosObj = Record<Shade, number>
+export type FullPalette = Record<Shade, PaletteColor>
+
+export type ShadesObj = Record<Shade, number>
 
 export type HSLColor = Record<HSL, number>
 

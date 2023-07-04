@@ -1,12 +1,37 @@
-import { BgColor, LightResult, RatiosObj, FinalPaletteRatios, Shade } from "../types"
+import { BgColor, LightResult, ShadesObj, Shade } from "../types"
 
-const VALID_HEX_COLORS: string[] = ['#1A6646', '#AC9FE4', '#DD45AA', '#00BAF5', '#1C734E', '#8FFFA3', '#FF9161', '#1145F8', '#2d7fbd', '#000', '#aaa']
+const VALID_HEX_COLORS: string[] = [
+  '#1A6646',
+  '#AC9FE4',
+  '#DD45AA',
+  '#00BAF5',
+  '#1C734E',
+  '#8FFFA3',
+  '#FF9161',
+  '#1145F8',
+  '#2d7fbd',
+  '#000',
+  '#aaa'
+]
 
 const VALID_BG_COLORS: BgColor[] = ['black', 'white']
 
-const INVALID_HEX_COLORS: string[] = ['notAColor', '#56hppa', '#909', 'test', '#fff1az', '>_%&']
+const INVALID_HEX_COLORS: string[] = [
+  'notAColor',
+  '#56hppa',
+  '#909',
+  'test',
+  '#fff1az',
+  '>_%&'
+]
 
-const INVALID_BG_COLORS: string[] = ['notAValidValue', 'thing', '#000000', 'wite', '>_%&']
+const INVALID_BG_COLORS: string[] = [
+  'notAValidValue',
+  'thing',
+  '#000000',
+  'wite',
+  '>_%&'
+]
 
 const VALID_LIGHT_ARGS: LightResult[] = [
   { ratio: 1.5, hex: '#aaaaaa' },
@@ -24,14 +49,21 @@ const INVALID_LIGHT_ARGS: any = [
 
 const COLOR_NAMES: string[] = ['100', '300', '600', '700', '800', '900']
 
-const ratios: RatiosObj = { '100': 4.5, '300': 3.1, '600': 3.1, '700': 5.1, '800': 3.1, '900': 3.1 }
+const ratios: ShadesObj = {
+  '100': 4.5,
+  '300': 3.1,
+  '600': 3.1,
+  '700': 5.1,
+  '800': 3.1,
+  '900': 3.1
+}
 
 /*the palette doesn't need to have the exact ratios as the target ones, but they have to be close and never be less*/
-const FINAL_PALETTE_VALID_RATIOS: FinalPaletteRatios =
-  COLOR_NAMES.reduce((acc: FinalPaletteRatios, colorName: Shade) => {
+const FINAL_PALETTE_VALID_RATIOS: any =
+  COLOR_NAMES.reduce((acc: any, colorName: Shade) => {
     acc[colorName] = getValidRatios(ratios[colorName])
     return acc
-  }, {} as FinalPaletteRatios)
+  }, {})
 
 
 function getRandomBgColor(): BgColor {
