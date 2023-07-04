@@ -2,7 +2,7 @@
   "name": "accessible-color-palette",
   "version": "1.0.0",
   "description": "build accessible monochromatic color palettes from any color of your choice",
-  "main": "index.js",
+  "main": "index.ts",
   "directories": {
     "doc": "docs",
     "test": "tests"
@@ -28,14 +28,19 @@
   },
   "homepage": "https://github.com/ceciCoding/acesssible-palette#readme",
   "dependencies": {
+    "@babel/preset-typescript": "^7.22.5",
     "@mdhnpm/color-contrast-ratio-calculator": "^1.0.4",
     "colorsys": "^1.0.22"
   },
   "devDependencies": {
     "@babel/core": "^7.22.5",
     "@babel/preset-env": "^7.22.5",
+    "@types/node": "^20.3.3",
     "babel-jest": "^29.5.0",
     "jest": "^29.5.0",
+    "ts-loader": "^9.4.4",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.1.6",
     "webpack": "^5.76.3",
     "webpack-cli": "^5.0.1"
   }

@@ -1,5 +1,7 @@
-const validatePaletteArgs = (colorHex, bgColor) => {
-  const errorMessage = getErrorMessage(colorHex, bgColor)
+import { BgColor, Validation } from "../types"
+
+const validatePaletteArgs = (colorHex: string, bgColor: BgColor): boolean => {
+  const errorMessage: string | null = getErrorMessage(colorHex, bgColor)
 
   if (errorMessage) {
     console.error(`Accessible color palette: ${errorMessage}`)
@@ -9,22 +11,22 @@ const validatePaletteArgs = (colorHex, bgColor) => {
   return true
 }
 
-const isValidHexColor = hex => {
+const isValidHexColor = (hex: string): boolean => {
   if (typeof hex !== "string") return false
   if (!hex) return false
-  const regex = /^#[0-9A-Fa-f]{6}$/g
+  const regex: RegExp = /^#[0-9A-Fa-f]{6}$/g
   //for valid hex colors like #000, #fff, #aaa, etc
-  const simplifiedRegex = /^#([0-9A-Fa-f])\1\1$/gi
+  const simplifiedRegex: RegExp = /^#([0-9A-Fa-f])\1\1$/gi
   return Boolean(hex.match(regex) || hex.match(simplifiedRegex))
 }
 
 
-const isBgColorValid = bgColor => {
+const isBgColorValid = (bgColor: BgColor): boolean => {
   return bgColor === 'white' || bgColor === 'black'
 }
 
-const getErrorMessage = (colorHex, bgColor) => {
-  const checks = {
+const getErrorMessage = (colorHex: string, bgColor: BgColor): string | null => {
+  const checks: any = {
     'Missing base color': colorHex,
     'Missing contrast color': bgColor,
     // 'Wrong color hex format. Format "#aaaaaa" is expected.': colorHex.charAt(0) !== '#',
@@ -41,9 +43,9 @@ const getErrorMessage = (colorHex, bgColor) => {
   return null
 }
 
-const validatePaletteColorBuilderArgs = (name, color, info) => {
-  const parameters = { name, color, info }
-  const messages = {
+const validatePaletteColorBuilderArgs = (name: string, color: string, info: string): boolean | Error => {
+  const parameters: any = { name, color, info }
+  const messages: any = {
     name: 'Missing name',
     color: 'Missing color',
     info: 'Missing info',
@@ -61,8 +63,8 @@ const validatePaletteColorBuilderArgs = (name, color, info) => {
   return true
 }
 
-const validateLightArgs = (desiredContrastRatio, colorHex) => {
-  const validations = [
+const validateLightArgs = (desiredContrastRatio: number, colorHex: string): boolean | Error => {
+  const validations: Validation[] = [
     {
       condition: !desiredContrastRatio || !colorHex,
       errorMessage: 'Missing arguments. Pass desired contrast ratio and color hex'
