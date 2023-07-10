@@ -20,7 +20,7 @@ According to the [WCAG contrast minimum success criterion](https://www.w3.org/WA
 ## Installation
 
 ```bash
-  npm install acessible-color-palette
+  npm i accessible-color-palette
 ```
     
 ## Usage/Examples
