@@ -28,7 +28,18 @@ export interface PaletteColor {
   info: string
 }
 
-export type FullPalette = Record<Shade, PaletteColor>
+export interface CompletePaletteColor {
+  name: string
+  rgb: Record<RGB, number>
+  hex: string
+  hsl: Record<HSL, number>
+  info: string
+  compatibilities: string[]
+}
+
+export type Palette = Record<Shade, PaletteColor>
+
+export type CompletePalette = Record<Shade, CompletePaletteColor>
 
 export type ShadesObj = Record<Shade, number>
 

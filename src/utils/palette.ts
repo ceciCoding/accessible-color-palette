@@ -2,19 +2,21 @@
 import {
   ShadesObj,
   BgColor,
-  FullPalette,
+  Palette,
   PaletteColor,
   LightResult,
   Adjustment,
   HSLColor,
   BgColorHex,
-  Shade
+  Shade,
+  CompletePalette
 } from '../types'
 import { hex2Hsl } from 'colorsys'
 import { colorContrastRatioCalculator } from '@mdhnpm/color-contrast-ratio-calculator'
 import { darken, illuminate } from './light'
 import { paletteColorBuilder, adjustColor, calculateColor } from './helpers'
 import { validatePaletteArgs } from './validations'
+import { getCompatibilities } from './compatibilities'
 
 const RATIOS: any = {
   '100': 4.5,
@@ -36,7 +38,7 @@ const ORIGIN_COLORS: any = {
 
 let cache: any = {}
 
-const generatePalette = (colorHex: string, bgColor: BgColor): FullPalette => {
+const generatePalette = (colorHex: string, bgColor: BgColor): CompletePalette => {
   if (!validatePaletteArgs(colorHex, bgColor)) return null
 
   //check for short hex like #000 or #aaa. colorContrastRatioCalculator requires full hex
@@ -61,8 +63,18 @@ const generatePalette = (colorHex: string, bgColor: BgColor): FullPalette => {
     const localHex: any = colors[ORIGIN_COLORS[name]].hex
     return colors[name] = getPaletteColor(name, bgColorHex, localHex)
   })
-  cache[cacheKey] = colors
-  return colors as FullPalette
+  const compatibilities = getCompatibilities(bgColorHex, colors)
+  const completePalette = Object.fromEntries(
+    Object.entries(colors).map(([shade, color]) => [
+      shade,
+      {
+        ...(color as PaletteColor),
+        compatibilities: compatibilities[shade]
+      }
+    ])
+  )
+  cache[cacheKey] = completePalette
+  return completePalette as CompletePalette
 }
 
 const get700 = (colorHex: string, bgColorHex: BgColorHex, currentContrastRatio: number): PaletteColor => {
