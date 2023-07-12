@@ -15,7 +15,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/ceciCoding/acesssible-palette"
+    "url": "https://github.com/ceciCoding/accessible-color-palette"
   },
   "keywords": [
     "accessibility",
@@ -24,9 +24,9 @@
   "author": "Ceci Olivera & Marta Hollingsworth",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/ceciCoding/acesssible-palette/issues"
+    "url": "https://github.com/ceciCoding/accessible-color-palette/issues"
   },
-  "homepage": "https://github.com/ceciCoding/acesssible-palette#readme",
+  "homepage": "https://github.com/ceciCoding/accessible-color-palette#readme",
   "dependencies": {
     "@babel/preset-typescript": "^7.22.5",
     "@mdhnpm/color-contrast-ratio-calculator": "^1.0.4",
