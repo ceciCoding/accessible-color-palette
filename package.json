@@ -2,7 +2,7 @@
   "name": "accessible-color-palette",
   "version": "1.0.1",
   "description": "build accessible monochromatic color palettes from any color of your choice",
-  "main": "index.ts",
+  "main": "dist/index.js",
   "directories": {
     "doc": "docs",
     "test": "tests"
@@ -19,7 +19,9 @@
   },
   "keywords": [
     "accessibility",
-    "ux/ui"
+    "ux/ui",
+    "a11y",
+    "color"
   ],
   "author": "Ceci Olivera & Marta Hollingsworth",
   "license": "MIT",
