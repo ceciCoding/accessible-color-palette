@@ -20,5 +20,7 @@ module.exports = {
     path: path.resolve(__dirname, 'dist'),
     library: 'AccessibleColorPalette',
     libraryTarget: 'umd',
-  },
+    globalObject: 'this',
+},
+
 }
