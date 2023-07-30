@@ -1,12 +1,13 @@
 import { PaletteColor, RGBColor, LightResult, HSLColor, Adjustment } from '../types'
-import { hsl2Hex, hexToRgb, rgb2Hsl } from 'colorsys'
 import { colorContrastRatioCalculator } from '@mdhnpm/color-contrast-ratio-calculator'
 import { validatePaletteColorBuilderArgs } from './validations'
 import { darken, illuminate } from './light'
 
+const convert = require('color-convert')
+
 const paletteColorBuilder = (name: string, color: string, info: string): PaletteColor => {
   if (!validatePaletteColorBuilderArgs(name, color, info)) return null
-  const rgb: RGBColor = hexToRgb(color)
+  const rgb: RGBColor = convert.hex.rgb(color)
   if (!rgb) {
     console.error(`Invalid color: ${color}`)
     return null
@@ -15,7 +16,7 @@ const paletteColorBuilder = (name: string, color: string, info: string): Palette
     name,
     rgb,
     hex: color,
-    hsl: rgb2Hsl(rgb.r, rgb.g, rgb.b),
+    hsl: convert.rgb.hsl(rgb.r, rgb.g, rgb.b),
     info,
   } as PaletteColor
 }
@@ -37,7 +38,7 @@ const adjustColor = (
     && colorHsl.l <= 100
   ) {
     colorHsl.l += adjustment
-    newColorHex = hsl2Hex(colorHsl)
+    newColorHex = convert.hsl.hex(colorHsl)
     newContrastRatio = Number(colorContrastRatioCalculator(bgColorHex, newColorHex).toFixed(1))
   }
 
@@ -45,7 +46,7 @@ const adjustColor = (
   if (newContrastRatio < targetRatio && colorHsl.l >= 0 && colorHsl.l <= 100) {
     adjustment = bgColorHex === "#000000" ? 1 : -1
     colorHsl.l += adjustment
-    newColorHex = hsl2Hex(colorHsl)
+    newColorHex = convert.hsl.hex(colorHsl)
     newContrastRatio = Number(colorContrastRatioCalculator(bgColorHex, newColorHex).toFixed(1))
   }
 

@@ -11,12 +11,13 @@ import {
   Shade,
   CompletePalette
 } from '../types'
-import { hex2Hsl } from 'colorsys'
 import { colorContrastRatioCalculator } from '@mdhnpm/color-contrast-ratio-calculator'
 import { darken, illuminate } from './light'
 import { paletteColorBuilder, adjustColor, calculateColor } from './helpers'
 import { validatePaletteArgs } from './validations'
 import { getCompatibilities } from './compatibilities'
+
+const convert = require('color-convert')
 
 const RATIOS: any = {
   '100': 4.5,
@@ -81,7 +82,7 @@ const get700 = (colorHex: string, bgColorHex: BgColorHex, currentContrastRatio: 
   const name: string = "700"
   const targetRatio: number = RATIOS[name as Shade] ?? 0
   let info: string = `(${targetRatio}:1 on background)`
-  const colorHsl: HSLColor = hex2Hsl(colorHex)
+  const colorHsl: HSLColor = convert.hex.hsl(colorHex)
 
   if (currentContrastRatio === targetRatio) {
     return paletteColorBuilder(name, colorHex, info)

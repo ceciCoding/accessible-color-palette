@@ -37,7 +37,7 @@
   "homepage": "https://github.com/ceciCoding/accessible-color-palette#readme",
   "dependencies": {
     "@mdhnpm/color-contrast-ratio-calculator": "^1.0.4",
-    "colorsys": "^1.0.22"
+    "color-convert": "^2.0.1"
   },
   "devDependencies": {
     "@types/node": "^20.3.3",
