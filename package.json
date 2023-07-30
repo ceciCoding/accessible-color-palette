@@ -1,6 +1,6 @@
 {
   "name": "accessible-color-palette",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "build accessible monochromatic color palettes from any color of your choice",
   "main": "dist/accessible-color-palette.bundle.js",
   "directories": {
