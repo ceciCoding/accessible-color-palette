@@ -2,8 +2,7 @@ import { PaletteColor, RGBColor, LightResult, HSLColor, Adjustment } from '../ty
 import { colorContrastRatioCalculator } from '@mdhnpm/color-contrast-ratio-calculator'
 import { validatePaletteColorBuilderArgs } from './validations'
 import { darken, illuminate } from './light'
-
-const convert = require('color-convert')
+import { convert } from 'color-convert'
 
 const paletteColorBuilder = (name: string, color: string, info: string): PaletteColor => {
   if (!validatePaletteColorBuilderArgs(name, color, info)) return null

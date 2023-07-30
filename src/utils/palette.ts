@@ -16,8 +16,7 @@ import { darken, illuminate } from './light'
 import { paletteColorBuilder, adjustColor, calculateColor } from './helpers'
 import { validatePaletteArgs } from './validations'
 import { getCompatibilities } from './compatibilities'
-
-const convert = require('color-convert')
+import { convert } from 'color-convert'
 
 const RATIOS: any = {
   '100': 4.5,

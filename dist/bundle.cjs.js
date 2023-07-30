@@ -1,6 +1,7 @@
 'use strict';
 
 var colorContrastRatioCalculator = require('@mdhnpm/color-contrast-ratio-calculator');
+var colorConvert = require('color-convert');
 
 const validatePaletteArgs = (colorHex, bgColor) => {
     const errorMessage = getErrorMessage(colorHex, bgColor);
@@ -78,16 +79,15 @@ const validateLightArgs = (desiredContrastRatio, colorHex) => {
     return true;
 };
 
-const convert$2 = require('color-convert');
 const darken = (desiredContrastRatio, colorHex) => {
     if (!validateLightArgs(desiredContrastRatio, colorHex))
         ;
     let newColorHex;
     let currentContrastRatio = 1;
-    const colorHsl = convert$2.hex.hsl(colorHex);
+    const colorHsl = colorConvert.convert.hex.hsl(colorHex);
     while (currentContrastRatio < desiredContrastRatio && colorHsl.l > 0) {
         colorHsl.l = colorHsl.l - 1;
-        newColorHex = convert$2.hsl.hex(colorHsl);
+        newColorHex = colorConvert.convert.hsl.hex(colorHsl);
         currentContrastRatio = Number(colorContrastRatioCalculator.colorContrastRatioCalculator(colorHex, newColorHex).toFixed(1));
     }
     return { hex: newColorHex, ratio: currentContrastRatio };
@@ -97,20 +97,19 @@ const illuminate = (desiredContrastRatio, colorHex) => {
         ;
     let newColorHex;
     let currentContrastRatio = 1;
-    const colorHsl = convert$2.hex.hsl(colorHex);
+    const colorHsl = colorConvert.convert.hex.hsl(colorHex);
     while (currentContrastRatio < desiredContrastRatio && colorHsl.l < 100) {
         colorHsl.l = colorHsl.l + 1;
-        newColorHex = convert$2.hsl.hex(colorHsl);
+        newColorHex = colorConvert.convert.hsl.hex(colorHsl);
         currentContrastRatio = Number(colorContrastRatioCalculator.colorContrastRatioCalculator(colorHex, newColorHex).toFixed(1));
     }
     return { hex: newColorHex, ratio: currentContrastRatio };
 };
 
-const convert$1 = require('color-convert');
 const paletteColorBuilder = (name, color, info) => {
     if (!validatePaletteColorBuilderArgs(name, color, info))
         ;
-    const rgb = convert$1.hex.rgb(color);
+    const rgb = colorConvert.convert.hex.rgb(color);
     if (!rgb) {
         console.error(`Invalid color: ${color}`);
         return null;
@@ -119,7 +118,7 @@ const paletteColorBuilder = (name, color, info) => {
         name,
         rgb,
         hex: color,
-        hsl: convert$1.rgb.hsl(rgb.r, rgb.g, rgb.b),
+        hsl: colorConvert.convert.rgb.hsl(rgb.r, rgb.g, rgb.b),
         info,
     };
 };
@@ -130,14 +129,14 @@ const adjustColor = (colorHsl, bgColorHex, currentContrastRatio, targetRatio, ad
         && colorHsl.l >= 0
         && colorHsl.l <= 100) {
         colorHsl.l += adjustment;
-        newColorHex = convert$1.hsl.hex(colorHsl);
+        newColorHex = colorConvert.convert.hsl.hex(colorHsl);
         newContrastRatio = Number(colorContrastRatioCalculator.colorContrastRatioCalculator(bgColorHex, newColorHex).toFixed(1));
     }
     // if resultant ratio after loop is less than target ratio
     if (newContrastRatio < targetRatio && colorHsl.l >= 0 && colorHsl.l <= 100) {
         adjustment = bgColorHex === "#000000" ? 1 : -1;
         colorHsl.l += adjustment;
-        newColorHex = convert$1.hsl.hex(colorHsl);
+        newColorHex = colorConvert.convert.hsl.hex(colorHsl);
         newContrastRatio = Number(colorContrastRatioCalculator.colorContrastRatioCalculator(bgColorHex, newColorHex).toFixed(1));
     }
     return {
@@ -185,7 +184,6 @@ const getCompatibilities = (BgColorHex, palette) => {
     };
 };
 
-const convert = require('color-convert');
 const RATIOS = {
     '100': 4.5,
     '300': 3.1,
@@ -236,7 +234,7 @@ const get700 = (colorHex, bgColorHex, currentContrastRatio) => {
     const name = "700";
     const targetRatio = (_a = RATIOS[name]) !== null && _a !== void 0 ? _a : 0;
     let info = `(${targetRatio}:1 on background)`;
-    const colorHsl = convert.hex.hsl(colorHex);
+    const colorHsl = colorConvert.convert.hex.hsl(colorHex);
     if (currentContrastRatio === targetRatio) {
         return paletteColorBuilder(name, colorHex, info);
     }

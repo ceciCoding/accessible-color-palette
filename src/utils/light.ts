@@ -1,8 +1,7 @@
 import { LightResult, HSLColor } from '../types'
 import { colorContrastRatioCalculator } from '@mdhnpm/color-contrast-ratio-calculator'
 import { validateLightArgs } from './validations'
-
-const convert = require('color-convert');
+import { convert } from 'color-convert'
 
 export const darken = (desiredContrastRatio: number, colorHex: string): LightResult | null => {
   if (!validateLightArgs(desiredContrastRatio, colorHex)) return null
