@@ -13,5 +13,4 @@ export default {
         },
       ],
     plugins: [typescript({ useTsconfigDeclarationDir: true })],
-    external: ['@mdhnpm/color-contrast-ratio-calculator', 'colorsys']
 }
