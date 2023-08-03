@@ -1,5 +1,6 @@
 import typescript from 'rollup-plugin-typescript2'
 import { nodeResolve } from '@rollup/plugin-node-resolve';
+import commonjs from '@rollup/plugin-commonjs';
 
 export default {
     input: 'src/index.ts', 
@@ -23,5 +24,11 @@ export default {
         },
       ],
     external: ['@mdhnpm/color-contrast-ratio-calculator', 'color-convert'],
-    plugins: [typescript({ useTsconfigDeclarationDir: true }), nodeResolve()],
+    plugins: [
+      typescript({ useTsconfigDeclarationDir: true }),
+      nodeResolve(),
+      commonjs({
+        include: 'node_modules/**'
+      })
+    ],
 }
