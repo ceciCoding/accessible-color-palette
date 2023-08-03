@@ -11,6 +11,11 @@ export default {
           file: 'dist/bundle.esm.js',
           format: 'esm',
         },
+        {
+          file: 'dist/bundle.iife.js',
+          format: 'iife',
+          name: 'AccessibleColorPalette',  
+        },
       ],
     plugins: [typescript({ useTsconfigDeclarationDir: true })],
 }
