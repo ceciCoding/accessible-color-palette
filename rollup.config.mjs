@@ -17,9 +17,10 @@ export default {
           name: 'AccessibleColorPalette',  
           globals: {
             '@mdhnpm/color-contrast-ratio-calculator': 'colorContrastRatioCalculator',
+            'color-convert': 'convert'
           },
         },
       ],
-    external: ['@mdhnpm/color-contrast-ratio-calculator'],
+    external: ['@mdhnpm/color-contrast-ratio-calculator', 'color-convert'],
     plugins: [typescript({ useTsconfigDeclarationDir: true })],
 }

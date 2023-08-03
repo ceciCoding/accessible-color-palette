@@ -258,4 +258,4 @@ var AccessibleColorPalette = (function (exports, colorContrastRatioCalculator, c
 
   return exports;
 
-})({}, colorContrastRatioCalculator, colorConvert);
+})({}, colorContrastRatioCalculator, convert);
