@@ -15,7 +15,11 @@ export default {
           file: 'dist/bundle.iife.js',
           format: 'iife',
           name: 'AccessibleColorPalette',  
+          globals: {
+            '@mdhnpm/color-contrast-ratio-calculator': 'colorContrastRatioCalculator',
+          },
         },
       ],
+    external: ['@mdhnpm/color-contrast-ratio-calculator'],
     plugins: [typescript({ useTsconfigDeclarationDir: true })],
 }
