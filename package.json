@@ -1,6 +1,6 @@
 {
   "name": "accessible-color-palette",
-  "version": "1.0.18",
+  "version": "1.0.19",
   "description": "build accessible monochromatic color palettes from any color of your choice",
   "main": "dist/bundle.cjs.js",
   "module": "dist/bundle.esm.js",
