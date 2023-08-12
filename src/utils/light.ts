@@ -1,5 +1,5 @@
 import { LightResult, HSLColor } from '../types'
-import { colorContrastRatioCalculator } from '@mdhnpm/color-contrast-ratio-calculator'
+import { getContrastRatio } from './contrast-ratio'
 import { validateLightArgs } from './validations'
 import { convert } from 'color-convert'
 
@@ -13,7 +13,7 @@ export const darken = (desiredContrastRatio: number, colorHex: string): LightRes
   while (currentContrastRatio < desiredContrastRatio && colorHsl.l > 0) {
     colorHsl.l = colorHsl.l - 1
     newColorHex = convert.hsl.hex(colorHsl)
-    currentContrastRatio = Number(colorContrastRatioCalculator(colorHex, newColorHex).toFixed(1))
+    currentContrastRatio = Number(getContrastRatio(colorHex, newColorHex).toFixed(1))
   }
   return { hex: newColorHex, ratio: currentContrastRatio } as LightResult
 }
@@ -28,7 +28,7 @@ export const illuminate = (desiredContrastRatio: number, colorHex: string): Ligh
   while (currentContrastRatio < desiredContrastRatio && colorHsl.l < 100) {
     colorHsl.l = colorHsl.l + 1
     newColorHex = convert.hsl.hex(colorHsl)
-    currentContrastRatio = Number(colorContrastRatioCalculator(colorHex, newColorHex).toFixed(1))
+    currentContrastRatio = Number(getContrastRatio(colorHex, newColorHex).toFixed(1))
   }
   return { hex: newColorHex, ratio: currentContrastRatio } as LightResult
 }

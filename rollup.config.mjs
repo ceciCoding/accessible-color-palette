@@ -18,12 +18,11 @@ export default {
           format: 'iife',
           name: 'AccessibleColorPalette',  
           globals: {
-            '@mdhnpm/color-contrast-ratio-calculator': 'colorContrastRatioCalculator',
             'color-convert': 'convert'
           },
         },
       ],
-    external: ['@mdhnpm/color-contrast-ratio-calculator', 'color-convert'],
+    external: ['color-convert'],
     plugins: [
       typescript({ useTsconfigDeclarationDir: true }),
       nodeResolve(),

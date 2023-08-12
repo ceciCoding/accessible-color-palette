@@ -1,6 +1,6 @@
 import { PaletteColor, RGBColor, LightResult, HSLColor, Adjustment } from '../types'
-import { colorContrastRatioCalculator } from '@mdhnpm/color-contrast-ratio-calculator'
 import { validatePaletteColorBuilderArgs } from './validations'
+import { getContrastRatio } from './contrast-ratio'
 import { darken, illuminate } from './light'
 import { convert } from 'color-convert'
 
@@ -38,7 +38,7 @@ const adjustColor = (
   ) {
     colorHsl.l += adjustment
     newColorHex = convert.hsl.hex(colorHsl)
-    newContrastRatio = Number(colorContrastRatioCalculator(bgColorHex, newColorHex).toFixed(1))
+    newContrastRatio = Number(getContrastRatio(bgColorHex, newColorHex).toFixed(1))
   }
 
   // if resultant ratio after loop is less than target ratio
@@ -46,7 +46,7 @@ const adjustColor = (
     adjustment = bgColorHex === "#000000" ? 1 : -1
     colorHsl.l += adjustment
     newColorHex = convert.hsl.hex(colorHsl)
-    newContrastRatio = Number(colorContrastRatioCalculator(bgColorHex, newColorHex).toFixed(1))
+    newContrastRatio = Number(getContrastRatio(bgColorHex, newColorHex).toFixed(1))
   }
 
   return {

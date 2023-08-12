@@ -1,7 +1,29 @@
 'use strict';
 
-var colorContrastRatioCalculator = require('@mdhnpm/color-contrast-ratio-calculator');
 var colorConvert = require('color-convert');
+
+const getLuminance = (r, g, b) => {
+    let a = [r, g, b].map(v => {
+        v /= 255;
+        return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+    });
+    return 0.2126 * a[0] + 0.7152 * a[1] + 0.0722 * a[2];
+};
+const getContrastRatio = (hexcolor1, hexcolor2) => {
+    let rgb1 = colorConvert.convert.hex.rgb(hexcolor1);
+    let rgb2 = colorConvert.convert.hex.rgb(hexcolor2);
+    if (!rgb1 || !rgb2) {
+        throw new Error('Invalid color hex provided.');
+    }
+    let luminance1 = getLuminance(rgb1.r, rgb1.g, rgb1.b);
+    let luminance2 = getLuminance(rgb2.r, rgb2.g, rgb2.b);
+    if (luminance1 > luminance2) {
+        return (luminance1 + 0.05) / (luminance2 + 0.05);
+    }
+    else {
+        return (luminance2 + 0.05) / (luminance1 + 0.05);
+    }
+};
 
 const validatePaletteArgs = (colorHex, bgColor) => {
     const errorMessage = getErrorMessage(colorHex, bgColor);
@@ -88,7 +110,7 @@ const darken = (desiredContrastRatio, colorHex) => {
     while (currentContrastRatio < desiredContrastRatio && colorHsl.l > 0) {
         colorHsl.l = colorHsl.l - 1;
         newColorHex = colorConvert.convert.hsl.hex(colorHsl);
-        currentContrastRatio = Number(colorContrastRatioCalculator.colorContrastRatioCalculator(colorHex, newColorHex).toFixed(1));
+        currentContrastRatio = Number(getContrastRatio(colorHex, newColorHex).toFixed(1));
     }
     return { hex: newColorHex, ratio: currentContrastRatio };
 };
@@ -101,7 +123,7 @@ const illuminate = (desiredContrastRatio, colorHex) => {
     while (currentContrastRatio < desiredContrastRatio && colorHsl.l < 100) {
         colorHsl.l = colorHsl.l + 1;
         newColorHex = colorConvert.convert.hsl.hex(colorHsl);
-        currentContrastRatio = Number(colorContrastRatioCalculator.colorContrastRatioCalculator(colorHex, newColorHex).toFixed(1));
+        currentContrastRatio = Number(getContrastRatio(colorHex, newColorHex).toFixed(1));
     }
     return { hex: newColorHex, ratio: currentContrastRatio };
 };
@@ -130,14 +152,14 @@ const adjustColor = (colorHsl, bgColorHex, currentContrastRatio, targetRatio, ad
         && colorHsl.l <= 100) {
         colorHsl.l += adjustment;
         newColorHex = colorConvert.convert.hsl.hex(colorHsl);
-        newContrastRatio = Number(colorContrastRatioCalculator.colorContrastRatioCalculator(bgColorHex, newColorHex).toFixed(1));
+        newContrastRatio = Number(getContrastRatio(bgColorHex, newColorHex).toFixed(1));
     }
     // if resultant ratio after loop is less than target ratio
     if (newContrastRatio < targetRatio && colorHsl.l >= 0 && colorHsl.l <= 100) {
         adjustment = bgColorHex === "#000000" ? 1 : -1;
         colorHsl.l += adjustment;
         newColorHex = colorConvert.convert.hsl.hex(colorHsl);
-        newContrastRatio = Number(colorContrastRatioCalculator.colorContrastRatioCalculator(bgColorHex, newColorHex).toFixed(1));
+        newContrastRatio = Number(getContrastRatio(bgColorHex, newColorHex).toFixed(1));
     }
     return {
         hex: newColorHex,
@@ -213,7 +235,7 @@ const generatePalette = (colorHex, bgColor) => {
         return cache[cacheKey];
     let colors = {};
     const bgColorHex = bgColor === 'white' ? '#ffffff' : '#000000';
-    const currentContrastRatio = Number(colorContrastRatioCalculator.colorContrastRatioCalculator(colorHex, bgColorHex)
+    const currentContrastRatio = Number(getContrastRatio(colorHex, bgColorHex)
         .toFixed(1));
     colors[700] = get700(colorHex, bgColorHex, currentContrastRatio);
     //the order is important

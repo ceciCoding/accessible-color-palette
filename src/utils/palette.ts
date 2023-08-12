@@ -11,7 +11,7 @@ import {
   Shade,
   CompletePalette
 } from '../types'
-import { colorContrastRatioCalculator } from '@mdhnpm/color-contrast-ratio-calculator'
+import { getContrastRatio } from './contrast-ratio'
 import { darken, illuminate } from './light'
 import { paletteColorBuilder, adjustColor, calculateColor } from './helpers'
 import { validatePaletteArgs } from './validations'
@@ -52,7 +52,7 @@ const generatePalette = (colorHex: string, bgColor: BgColor): CompletePalette =>
   let colors: any = {}
   const bgColorHex: BgColorHex = bgColor === 'white' ? '#ffffff' : '#000000'
   const currentContrastRatio: number = Number(
-    colorContrastRatioCalculator(colorHex, bgColorHex)
+    getContrastRatio(colorHex, bgColorHex)
       .toFixed(1)
   )
 
