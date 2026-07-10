@@ -7,7 +7,7 @@ Add it to your MCP client config (Claude Desktop, Cursor, etc.) — no installat
   "mcpServers": {
     "accessible-color-palette": {
       "command": "npx",
-      "args": ["-y", "accessible-color-palette"]
+      "args": ["-y", "--package=accessible-color-palette", "accessible-color-palette-mcp"]
     }
   }
 }
