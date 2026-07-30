@@ -172,25 +172,47 @@ interface PaletteResult {
 
 | Shade | Hex | RGB | HSL |
 |-------|-----|-----|-----|
-| 100 | `#d6f5e8` | `214, 245, 232` | `152°, 62%, 90%` |
-| 300 | `#71dbae` | `113, 219, 174` | `152°, 59%, 65%` |
-| 600 | `#259868` | `37, 152, 104` | `152°, 61%, 37%` |
-| 700 | `#1f7a54` | `31, 122, 84` | `152°, 59%, 30%` |
-| 800 | `#10422d` | `16, 66, 45` | `152°, 61%, 16%` |
-| 900 | `#082116` | `8, 33, 22` | `152°, 61%, 8%` |
+| 100 | `#e3f8ef` | `227, 248, 239` | `154°, 60%, 93%` |
+| 300 | `#78dcb1` | `120, 220, 177` | `154°, 59%, 67%` |
+| 600 | `#279c6a` | `39, 156, 106` | `154°, 60%, 38%` |
+| 700 | `#207c55` | `32, 124, 85` | `155°, 59%, 31%` |
+| 800 | `#124630` | `18, 70, 48` | `155°, 59%, 17%` |
+| 900 | `#0a2519` | `10, 37, 25` | `153°, 57%, 9%` |
 
 **`generatePalette('#239062', 'black')`** — dark theme inverts the lightness direction
 
 | Shade | Hex | RGB | HSL |
 |-------|-----|-----|-----|
-| 100 | `#061911` | `6, 25, 17` | `152°, 61%, 6%` |
-| 300 | `#0e3927` | `14, 57, 39` | `152°, 61%, 14%` |
-| 600 | `#1c734e` | `28, 115, 78` | `152°, 61%, 28%` |
-| 700 | `#239062` | `35, 144, 98` | `152°, 61%, 35%` |
-| 800 | `#4fd498` | `79, 212, 152` | `152°, 59%, 57%` |
-| 900 | `#b9eed8` | `185, 238, 216` | `152°, 62%, 83%` |
+| 100 | `#05130d` | `5, 19, 13` | `154°, 58%, 5%` |
+| 300 | `#0e3826` | `14, 56, 38` | `154°, 60%, 14%` |
+| 600 | `#1d704d` | `29, 112, 77` | `155°, 59%, 28%` |
+| 700 | `#238e61` | `35, 142, 97` | `155°, 60%, 35%` |
+| 800 | `#4dd199` | `77, 209, 153` | `155°, 59%, 56%` |
+| 900 | `#b4edd5` | `180, 237, 213` | `155°, 61%, 82%` |
 
 For `theme: 'black'`, shade 100 is the darkest. The lightness order is inverted relative to `theme: 'white'` — this is by design.
+
+### The compatibility matrix
+
+This is the core of the library: every shade is checked against every other shade **and** the theme background, producing a full pairwise contrast matrix. `usage` (see [Output shape](#output-shape) above) is derived from this matrix, and it's exactly what the MCP server's `validate_pairings` tool checks against.
+
+**Matrix for `generatePalette('#1F7A54', 'white')`** — contrast ratio and WCAG 2.2 level for every pair:
+
+| from ＼ to | theme (`#fff`) | 100 | 300 | 600 | 700 | 800 | 900 |
+|---|---|---|---|---|---|---|---|
+| **theme** | — | 1.11 fail | 1.66 fail | 3.47 AA-large | 5.15 AA | 10.80 AA | 16.26 AA |
+| **100** | 1.11 fail | — | 1.49 fail | 3.13 AA-large | 4.65 AA | 9.74 AA | 14.66 AA |
+| **300** | 1.66 fail | 1.49 fail | — | 2.09 fail | 3.11 AA-large | 6.52 AA | 9.81 AA |
+| **600** | 3.47 AA-large | 3.13 AA-large | 2.09 fail | — | 1.48 fail | 3.11 AA-large | 4.68 AA |
+| **700** | 5.15 AA | 4.65 AA | 3.11 AA-large | 1.48 fail | — | 2.10 fail | 3.16 AA-large |
+| **800** | 10.80 AA | 9.74 AA | 6.52 AA | 3.11 AA-large | 2.10 fail | — | 1.51 fail |
+| **900** | 16.26 AA | 14.66 AA | 9.81 AA | 4.68 AA | 3.16 AA-large | 1.51 fail | — |
+
+- `AA` — passes at 4.5:1+ (normal text, small UI)
+- `AA-large` — passes at 3:1–4.49:1 (headings ≥24px, large/bold text, non-text UI)
+- `fail` — below 3:1, don't pair these two shades for text
+
+The matrix is symmetric — contrast ratio doesn't care about direction — but notice **adjacent shades almost always fail** (700↔800: 2.10, 600↔700: 1.48, 300↔600: 2.09). That's expected: they're too close in lightness by construction. The usable pairings skip at least one step (`100`↔`700`, `900`↔`600`, `theme`↔`700`, etc.). This is the whole point of computing the matrix instead of eyeballing which shades are "probably fine" together.
 
 ---
 
