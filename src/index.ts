@@ -21,6 +21,17 @@ export function toCSSTokens(result: PaletteResult, prefix?: string): string {
 export const validatePairings = _validatePairings
 export const checkContrast = _checkContrast
 
+export { lintPluralSigil } from './sigil/plural-sigil.js'
+export {
+  UAPA_INVARIANT_SIGIL_RENORMALIZATION_FLOW_ID,
+  UAPA_SIGIL_ACCESSIBLE_PALETTE_LINTER_ID,
+  buildInvariantSigilRenormalizationFlow,
+  buildSigilPaletteFlow,
+  lintAccessiblePalette,
+} from './sigil/index.js'
+export { cecicodeInspiredProfile } from './profile/cecicodeInspired.js'
+export { validateProfileColorPairs } from './output/policyValidation.js'
+
 export type {
   PaletteResult,
   Palette,
@@ -37,6 +48,59 @@ export type {
   PaletteUsage,
   CompatibilityEntry,
   CompatibilityMatrix,
+  PluralSigilStage,
+  PluralSigilPrimitiveKind,
+  PluralSigilRuntime,
+  PluralSigilSeverity,
+  PluralSigilIssueCode,
+  PluralSigilPairingLevel,
+  QquappTeleportationMethod,
+  QquappEncoder,
+  QquappDecoder,
+  QecZooReference,
+  QquappKokompiLibrary,
+  PluralSigilPairing,
+  PluralSigilInjection,
+  PluralSigilInput,
+  PluralSigilFlow,
+  PluralSigilIssue,
+  PluralSigilValidationPairing,
+  PluralSigilValidation,
+  PluralSigilPayload,
+  PluralSigilPrimitive,
+  PluralSigilAgentExposition,
+  PluralSigilRelease,
+  PluralSigilReport,
 } from './types.js'
 
+export type {
+  SigilPaletteFlow,
+  SigilPaletteLintInput,
+  SigilPaletteLintResult,
+  SigilPalettePairing,
+  SigilPalettePdgWitness,
+  SigilPaletteTheme,
+  SigilPrimitive,
+  ContextTensorRole,
+  ContextTensorVariance,
+  ContextTypedTensor,
+  GeneralizedMeraLayer,
+  InvariantSigilRenormalizationFlow,
+  InvariantSigilRenormalizationInput,
+  PacaPdgRenormalizationWitness,
+  PluralTheorySource,
+  RenormalizationColimit,
+  RenormalizationGlueStage,
+  TwistedInjectionWitness,
+} from './sigil/index.js'
+export type {
+  AccessibilityProfile,
+  AccessibilityProfileCriterion,
+  AccessibilityProfilePolicy,
+  ColorPairPolicyInput,
+  ColorPairRole,
+  ProfileValidationIssue,
+  ProfileValidationReport,
+  ProfileValidationSeverity,
+} from './profile/index.js'
 export type { PairingLevel, PairingResult, ValidationReport, ContrastCheckResult } from './output/validation.js'
