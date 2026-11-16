@@ -9,6 +9,8 @@ A TypeScript library that generates **WCAG 2.2 AA compliant monochromatic palett
 
 Given a hex color and a background theme (`'white'` | `'black'`), it produces 6 shades — **100, 300, 600, 700, 800, 900** — where every shade meets contrast requirements against the theme. It also returns a usage map describing which shade pairs pass AA for normal text (4.5:1) and which pass for large text / UI components (3:1).
 
+It also ships an **APCA variant** (the WCAG 3 draft contrast model) with its own derivation chain, directional usage map and CSS manifest — see [APCA variant](#apca-variant-wcag-3-draft).
+
 Ships as an ESM library, a **CLI**, and an **MCP server** for use with AI assistants.
 
 ---
@@ -33,6 +35,7 @@ npx accessible-color-palette <hex> <theme> [options]
 |-------------------|-------------|
 | `hex` | Hex color — with or without `#`, 3 or 6 chars |
 | `theme` | Background theme: `white` \| `black` |
+| `--model <name>` | Contrast model: `wcag2` (default) \| `apca` |
 | `--prefix <name>` | CSS variable prefix (default: `color`) |
 | `--json` | Output full palette + usage map as JSON |
 | `-h, --help` | Show help |
@@ -46,6 +49,9 @@ npx accessible-color-palette 1F7A54 white --prefix brand
 
 # Raw JSON
 npx accessible-color-palette 1F7A54 white --json
+
+# APCA (WCAG 3 draft) palette + directional manifest
+npx accessible-color-palette 1F7A54 white --model apca
 ```
 
 Output (default):
@@ -134,7 +140,7 @@ console.log(checkContrast('#ffffff', '#c75d3a'))
 
 ### As an MCP server
 
-Also ships as an MCP server exposing `generate_palette`, `validate_pairings`, `generate_css_tokens`, and `check_contrast` as tools, plus a `palette://{hex}/{theme}` resource and a `plan-palette-usage` guided prompt. `generate_css_tokens` enforces a server-side gate — it rejects requests for a hex+theme until `validate_pairings` has passed for that same combination earlier in the session.
+Also ships as an MCP server exposing `generate_palette`, `validate_pairings`, `generate_css_tokens`, and `check_contrast` as tools, plus a `palette://{hex}/{theme}` resource and a `plan-palette-usage` guided prompt. Every tool accepts an optional `model: "wcag2" | "apca"` (default `wcag2`). `generate_css_tokens` enforces a server-side gate — it rejects requests for a hex+theme+model until `validate_pairings` has passed for that same combination earlier in the session.
 
 See **[MCP.md](./MCP.md)** for client config, the full tools table, and how the gate and the guided-prompt workflow relate to each other.
 
@@ -216,22 +222,152 @@ The matrix is symmetric — contrast ratio doesn't care about direction — but 
 
 ---
 
+## APCA variant (WCAG 3 draft)
+
+[APCA](https://github.com/Myndex/apca-w3) is the contrast model proposed for WCAG 3. It is **not** a drop-in replacement for the WCAG 2 ratio, and the library does not pretend it is. Three things change:
+
+1. **Values are signed.** Dark text on a light background gives a positive `Lc`; light text on a dark background gives a negative one. Black on white is `Lc 106`, white on black is `Lc -108`. The sign is the *polarity*; `|Lc|` is the magnitude.
+2. **Values are directional.** `Lc(text, background) !== -Lc(background, text)`. `#888` on `#fff` is `63.1`, but `#fff` on `#888` is `-68.5`. So the APCA usage map describes each shade **as text** on a list of backgrounds. A pairing listed one way is not automatically valid the other way.
+3. **Levels are role-based, not size-based.** The palette uses the simplified APCA levels: `preferred-text` (`|Lc| ≥ 90`), `body-text` (`≥ 75`), `content-text` (`≥ 60`, headlines / large text), `large-text` (`≥ 45`, very large or bold text, icons, UI strokes), `non-text` (`≥ 15`, borders and dividers only). Full APCA conformance is a font-size × weight lookup table; this library guarantees the role minimum, nothing more.
+
+The APCA math is implemented directly in `src/math/apca.ts` (APCA-W3 0.1.9, constants `0.0.98G-4g`) and tested against the official `apca-w3` reference values. WCAG 3 is still a Working Draft, so the public API is named `apca`, never `wcag3`.
+
+**[APCA.md](./APCA.md)** has the full story: the formula, the chain, the simulations behind the 900 decision, and the open questions.
+
+### Usage
+
+```ts
+import { generateApcaPalette, toApcaCSSTokens, validateApcaPairings, checkApcaContrast } from 'accessible-color-palette'
+
+const result = generateApcaPalette('#1F7A54', 'white')
+
+// usage[shade] describes that shade AS TEXT. Each background sits in its highest bucket only.
+console.log(result.usage['700'])
+{
+  hex: '#207c55',
+  preferredText: [],
+  bodyText:    [{ key: 'theme', hex: '#ffffff', lc: 75.1 }],
+  contentText: [{ key: '100',   hex: '#c5f0de', lc: 60.7 }],
+  largeText:   [],
+  nonText:     [{ key: '300', hex: '#74dbb0', lc: 43.4 }, { key: '900', hex: '#0e3424', lc: -21.9 }],
+}
+
+console.log(toApcaCSSTokens(result))           // APCA manifest + :root block, see below
+
+validateApcaPairings(result, [{ foreground: '700', background: 'white' }]).pairings[0].level
+// 'body-text'
+
+checkApcaContrast('#ffffff', '#000000')
+// { lc: -107.9, polarity: 'light-on-dark', level: 'preferred-text', ... }
+```
+
+### Shade contract
+
+| Shade | Measured as | Target | Role |
+|-------|-------------|--------|------|
+| 700 | 700 **on theme background** | `\|Lc\| ≥ 75` | body text on the page background (anchor) |
+| 100 | **700 on 100** | `\|Lc\| ≥ 60` | the light tint; 700 still reads as content text on it |
+| 300 | 300 on 100 | `\|Lc\| ≥ 15` | non-text: borders, dividers |
+| 600 | 600 on 100 | `\|Lc\| ≥ 45` | large text and icons |
+| 800 | 800 on 100 | `\|Lc\| ≥ 75` | body text on the 100 tint |
+| 900 | 900 **on theme background**, starting from 800 | `\|Lc\| ≥ 100` | preferred text with margin; deepest shade that still carries hue |
+
+Why is 900 not "Lc 90 on 100"? Because it cannot be. With 700 pinned at `Lc 75` and 100 at `Lc 60`, the 100 tint lands at a luminance where the *maximum* reachable contrast on it is about `Lc 91` — for every hue. Asking for 90 leaves one point of headroom and collapses 900 to pure black (`#031330` for a blue, `#02120d` for a green). Measuring against the theme background instead gives the same 15-point ladder (`75 / 90 / 100` for `700 / 800 / 900`) while keeping the hue. In APCA the dark end is compressed by design: there is room for exactly one body-text rung between 700 and black.
+
+### Example output
+
+**`generateApcaPalette('#1F7A54', 'white')`** — compare with the WCAG 2 table above
+
+| Shade | Hex | Lc on white | Lc on 100 |
+|-------|-----|-------------|-----------|
+| 100 | `#c5f0de` | 12.0 | — |
+| 300 | `#74dbb0` | 29.5 | 15.1 |
+| 600 | `#2aa16f` | 59.6 | 45.1 |
+| 700 | `#207c55` | 75.1 | 60.7 |
+| 800 | `#16543a` | 90.1 | 75.6 |
+| 900 | `#0e3424` | 100.0 | 85.6 |
+
+**`generateApcaPalette('#239062', 'black')`** — every value is negative (light on dark)
+
+| Shade | Hex | Lc on black | Lc on 100 |
+|-------|-----|-------------|-----------|
+| 100 | `#16583c` | -13.5 | — |
+| 300 | `#21855b` | -30.1 | -15.5 |
+| 600 | `#32c889` | -60.4 | -45.8 |
+| 700 | `#78deb3` | -75.1 | -60.5 |
+| 800 | `#baeed8` | -89.6 | -75.0 |
+| 900 | `#e3f8ef` | -100.1 | -85.5 |
+
+The CSS manifest reads "shade **as text** → backgrounds" and says so up front:
+
+```css
+/*
+ * APCA PAIRING MANIFEST — source: #1f7a54 · theme: white · model: APCA-W3 0.1.9 (WCAG 3 draft)
+ *
+ * Every line reads "shade-X AS TEXT → backgrounds". APCA is DIRECTIONAL:
+ * swapping text and background changes the Lc value. A pairing listed here
+ * is NOT automatically valid with the roles reversed.
+ *
+ * PREFERRED BODY TEXT (Lc ≥ 90):
+ *   shade-800 (#16543a) → white
+ *   shade-900 (#0e3424) → white
+ *
+ * BODY TEXT (Lc 75–90 — any size):
+ *   shade-100 (#c5f0de) → 900, 800
+ *   shade-700 (#207c55) → white
+ *   ...
+ */
+:root {
+--color-100: #c5f0de; /* ✅ body→900·800  ◐ content→700  ⚠️ lg→600  ▫ non-text→300 */
+--color-700: #207c55; /* ✅ body→white  ◐ content→100  ▫ non-text→300·900 */
+--color-900: #0e3424; /* ★ preferred→white  ✅ body→100  ◐ content→300  ▫ non-text→600·700 */
+}
+```
+
+Notice `shade-100 → 900, 800` under BODY TEXT: the light tint is valid **as light text on the dark shades**. That is the directional map doing its job — the WCAG 2 version cannot express that distinction.
+
+### Output shape
+
+```ts
+interface ApcaPaletteResult {
+  model: 'apca'
+  palette: Record<ShadeKey, { hex; rgb; hsl }>      // same as PaletteResult
+  usage: Record<ShadeKey, {
+    hex: string
+    preferredText: Array<{ key; hex; lc: number }>  // |Lc| ≥ 90
+    bodyText:      Array<{ key; hex; lc: number }>  // |Lc| ≥ 75
+    contentText:   Array<{ key; hex; lc: number }>  // |Lc| ≥ 60
+    largeText:     Array<{ key; hex; lc: number }>  // |Lc| ≥ 45
+    nonText:       Array<{ key; hex; lc: number }>  // |Lc| ≥ 15
+  }>
+  theme: 'white' | 'black'
+  sourceColor: string
+}
+```
+
+`lc` is signed. Pairs below `|Lc| 15` are omitted. `key` is a shade or `'theme'`.
+
+---
+
 ## How the algorithm works
 
 ### The core primitive
 
-Every shade is found by the same iterative mechanism: start from a color, walk its HSL lightness in steps of 0.5%, and stop when the WCAG 2.2 contrast ratio against a reference color reaches the target.
+Every shade is found by the same iterative mechanism: start from a color, walk its HSL lightness in steps of 0.5%, and stop when a contrast metric against a reference color reaches the target.
 
 ```
-stepTowardRatio(startHex, referenceHex, targetRatio, direction)
+walkLightness(startHex, direction, measure, target)
   1. Convert startHex to HSL
   2. Adjust lightness +/- 0.005 per step
-  3. After each step: compute contrastRatio(current, referenceHex)
-  4. Stop when ratio >= targetRatio
+  3. After each step: measure(current)
+  4. Stop when measure >= target
   5. Safety limit: throw after 1000 steps
+
+retreatLightness(startHex, direction, measure, target)
+  Same walk, but used to DECREASE contrast: returns the last value still >= target.
 ```
 
-Contrast is always computed using the **exact WCAG 2.2 formula** — no approximations, no HSL lightness shortcuts.
+The walker is metric-agnostic. `stepTowardRatio` plugs in the WCAG 2.2 ratio; the APCA chain plugs in `|Lc|` with the moving color's role (text or background) fixed. Contrast is always computed using the **exact formula** of the chosen model — no approximations, no HSL lightness shortcuts.
 
 ### Shade derivation chain
 
@@ -295,7 +431,7 @@ flowchart TD
 
 - **No classes.** Purely functional — no `class`, no `new`, no `this`.
 - **No mutation.** Every function returns a new value.
-- **No external color libraries.** The WCAG math is ~25 lines, implemented directly.
+- **No external color libraries.** The WCAG math is ~25 lines and the APCA math ~40, both implemented directly.
 - **Strict TypeScript.** `strict: true`, branded `HexColor` type to prevent raw strings leaking through the API.
 - **Pure functions.** Same input, same output. The only side effects are in `src/mcp/server.ts`.
 - **Single responsibility.** Each function does exactly one thing.
@@ -319,6 +455,22 @@ Checks a list of foreground/background shade pairs against `result`'s compatibil
 ### `checkContrast(foregroundHex: string, backgroundHex: string): ContrastCheckResult`
 
 Standalone WCAG 2.2 contrast check between any two hex colors — not tied to a generated palette. Use it for accent colors (brand colors, status colors) that aren't part of the monochrome scale. Returns `{ foreground, background, ratio, level, message }`.
+
+### `generateApcaPalette(hex: string, theme: 'white' | 'black'): ApcaPaletteResult`
+
+APCA entry point. Same input contract as `generatePalette`; returns the APCA derivation chain and the directional usage map described in [APCA variant](#apca-variant-wcag-3-draft).
+
+### `toApcaCSSTokens(result: ApcaPaletteResult, prefix?: string): string`
+
+APCA manifest + `:root {}` block with per-shade role comments.
+
+### `validateApcaPairings(result: ApcaPaletteResult, pairings): ApcaValidationReport`
+
+Same shape as `validatePairings`. `foreground` is the **text**, `background` is the **background** — direction matters. `level` is one of `'preferred-text' | 'body-text' | 'content-text' | 'large-text' | 'non-text' | 'fail' | 'invalid'`; only the four text levels count towards `allPass`.
+
+### `checkApcaContrast(foregroundHex: string, backgroundHex: string): ApcaContrastCheckResult`
+
+Standalone APCA check. Returns `{ foreground, background, lc, polarity, level, message }` with `lc` signed and `polarity` one of `'dark-on-light' | 'light-on-dark' | 'none'`.
 
 ---
 

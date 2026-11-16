@@ -30,4 +30,18 @@ describe('SessionGate', () => {
     gate.markValidated('1f7a54', 'white')
     expect(gate.isValidated('2a8b65', 'white')).toBe(false)
   })
+
+  it('does not leak validation across contrast models', () => {
+    const gate = new SessionGate()
+    gate.markValidated('1f7a54', 'white', 'wcag2')
+    expect(gate.isValidated('1f7a54', 'white', 'apca')).toBe(false)
+    expect(gate.isValidated('1f7a54', 'white')).toBe(true)
+  })
+
+  it('validates apca independently', () => {
+    const gate = new SessionGate()
+    gate.markValidated('1f7a54', 'white', 'apca')
+    expect(gate.isValidated('1f7a54', 'white', 'apca')).toBe(true)
+    expect(gate.isValidated('1f7a54', 'white')).toBe(false)
+  })
 })

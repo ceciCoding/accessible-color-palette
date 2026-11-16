@@ -62,3 +62,54 @@ export interface PaletteResult {
 }
 
 export type CSSTokens = string
+
+// ─── APCA (WCAG 3 draft) ─────────────────────────────────────────────────────
+
+export type ContrastModel = 'wcag2' | 'apca'
+
+// Role a text/background pair qualifies for, by |Lc|. Highest level only.
+export type ApcaLevel =
+  | 'preferred-text' // |Lc| >= 90
+  | 'body-text'      // |Lc| >= 75
+  | 'content-text'   // |Lc| >= 60
+  | 'large-text'     // |Lc| >= 45
+  | 'non-text'       // |Lc| >= 15
+  | 'fail'           // below 15
+
+// 'dark-on-light' = positive Lc, 'light-on-dark' = negative Lc
+export type ApcaPolarity = 'dark-on-light' | 'light-on-dark' | 'none'
+
+export interface ApcaMatrixEntry {
+  lc: number // signed
+  level: ApcaLevel
+}
+
+// matrix[text][background] — ordered, asymmetric
+export type ApcaMatrix = Record<MatrixKey, Partial<Record<MatrixKey, ApcaMatrixEntry>>>
+
+export interface ApcaPair {
+  key: BackgroundKey
+  hex: HexColor
+  lc: number // signed
+}
+
+// usage[shade] describes that shade AS TEXT. Each background appears in its
+// highest qualifying bucket only. Pairs below Lc 15 are omitted entirely.
+export interface ApcaShadeUsage {
+  hex: HexColor
+  preferredText: ApcaPair[]
+  bodyText: ApcaPair[]
+  contentText: ApcaPair[]
+  largeText: ApcaPair[]
+  nonText: ApcaPair[]
+}
+
+export type ApcaPaletteUsage = Record<ShadeKey, ApcaShadeUsage>
+
+export interface ApcaPaletteResult {
+  model: 'apca'
+  palette: Palette
+  usage: ApcaPaletteUsage
+  theme: Theme
+  sourceColor: HexColor
+}

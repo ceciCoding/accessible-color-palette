@@ -50,6 +50,15 @@ enforces the critical part of that sequence server-side regardless of what the m
 | `generate_css_tokens` | Returns a CSS `:root {}` block with inline WCAG comments per shade. **Requires `validate_pairings` to have passed for the same hex+theme earlier in the session** — it throws otherwise (server-side gate, not just a convention) |
 | `check_contrast` | Standalone contrast check between any two hex colors, independent of any generated palette. Use it for accent colors (a status/brand hex that is NOT one of the foundation shades) — `validate_pairings` only knows shade keys and white/black, so it can't check an arbitrary hex |
 
+Every tool takes an optional `model` argument: `"wcag2"` (default) or `"apca"`.
+
+| `model` | What you get |
+|---------|--------------|
+| `wcag2` | WCAG 2.2 AA ratios. Symmetric. Levels `aa-normal` / `aa-large` / `fail` |
+| `apca` | APCA (WCAG 3 draft) Lc values. **Directional**: `foreground` is the text, `background` is the background, and swapping them changes the number. Signed: negative means light text on a dark background. Levels `preferred-text` (`\|Lc\| ≥ 90`) / `body-text` (`≥ 75`) / `content-text` (`≥ 60`, headlines and large text) / `large-text` (`≥ 45`, very large or bold text, icons) / `non-text` (`≥ 15`, borders only — never text) / `fail` |
+
+The gate in `generate_css_tokens` is keyed on hex + theme + **model**. A WCAG 2 validation does not unlock APCA tokens, or the other way round — they are different matrices. Pick one model per task and use it in every call.
+
 > [!NOTE]
 > The 100–900 scale this server generates is the **foundation layer** of a palette, not necessarily the whole thing. Most real interfaces also need 1–2 semantic accent colors (error/success/warning/sale) that the monochrome scale can't express — that's what `check_contrast` is for. Don't read "monochromatic" in this project's name as "never use any other color in the UI."
 
@@ -59,10 +68,11 @@ enforces the critical part of that sequence server-side regardless of what the m
 There's also a resource template you can read directly:
 
 ```
-palette://{hex}/{theme}
+palette://{hex}/{theme}        → WCAG 2.2 matrix
+palette://{hex}/{theme}/apca   → APCA matrix (each shade AS TEXT → backgrounds, by role)
 ```
 
-Returns the full WCAG compatibility matrix as JSON — useful as a reference before making color decisions.
+Returns the full compatibility matrix as JSON — useful as a reference before making color decisions.
 
 ---
 
@@ -87,6 +97,8 @@ natural-language requests, never this prompt, and still came out the way they di
 **Example instruction to your agent:**
 
 > "Use the `plan-palette-usage` prompt with hex=`1f7a54` and theme=`white`, then design a user profile card."
+
+The prompt takes an optional third argument, `model` (`wcag2` | `apca`). With `apca` the planning step asks the model to check each pairing against the role buckets and to validate the reverse direction separately whenever both directions are used.
 
 > [!NOTE]
 > **MCP prompts are user-controlled by spec, not model-controlled like tools.** A model can never invoke `plan-palette-usage` on its own just because you asked it to in natural language ("use the prompt X") — only a human typing the actual slash command triggers it, in every MCP client, by design. In Claude Code that's `/mcp__accessible-palette__plan-palette-usage <hex> <theme>`; it shows up in the autocomplete and runs like any other prompt. Cline exposes the same capability through its own UI. If nobody types that, this entire section never runs — which is exactly why the accessibility guarantee was moved into Option A's server-side gate instead of depending on this.
