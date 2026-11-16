@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { generatePalette, toCSSTokens } from '../src/index.js'
+import { parseHex } from '../src/input/parse.js'
+import { hexToHSL, hexToRGB } from '../src/math/color.js'
 
 const bgRatio = (result: ReturnType<typeof generatePalette>, shade: '100' | '300' | '600' | '700' | '800' | '900') => {
   const allPairs = [...result.usage[shade].normalText, ...result.usage[shade].largeText]
@@ -75,6 +77,55 @@ describe('toCSSTokens integration', () => {
       expect(line.startsWith('--theme-')).toBe(true)
     }
   })
+})
+
+describe('generatePalette — color input formats', () => {
+  const fromHex = generatePalette('#1f7a54', 'white')
+
+  it.each([
+    ['rgb string', 'rgb(31, 122, 84)'],
+    ['hsl string', 'hsl(155, 59%, 30%)'],
+    ['rgb object', { r: 31, g: 122, b: 84 }],
+    ['hsl object', { h: 155, s: 59, l: 30 }],
+  ] as const)('%s produces the same palette as the equivalent hex', (_label, input) => {
+    expect(generatePalette(input, 'white')).toEqual(fromHex)
+  })
+
+  it('throws for out-of-range rgb instead of clamping', () => {
+    expect(() => generatePalette('rgb(300, 0, 0)', 'white')).toThrow('Invalid rgb color')
+  })
+})
+
+// Deterministic pseudo-random hex colors (LCG) so failures are reproducible.
+const sampleHexes = (count: number): string[] => {
+  const next = (seed: number): number => (seed * 1664525 + 1013904223) % 4294967296
+  return Array.from({ length: count }).reduce<{ seed: number; out: string[] }>(
+    (acc) => {
+      const seed = next(acc.seed)
+      const hex = `#${Math.floor((seed / 4294967296) * 0xffffff).toString(16).padStart(6, '0')}`
+      return { seed, out: [...acc.out, hex] }
+    },
+    { seed: 42, out: [] },
+  ).out
+}
+
+describe('generatePalette — equivalent inputs yield identical palettes (sampled colors)', () => {
+  const hexes = sampleHexes(300)
+
+  for (const theme of ['white', 'black'] as const) {
+    it(`rgb string, rgb object and full-precision hsl object match hex on ${theme}`, () => {
+      for (const hex of hexes) {
+        const expected = generatePalette(hex, theme)
+        const rgb = hexToRGB(parseHex(hex))
+        const [r, g, b] = [rgb.r, rgb.g, rgb.b].map((v) => Math.round(v * 255)) as [number, number, number]
+        const hsl = hexToHSL(parseHex(hex))
+
+        expect(generatePalette(`rgb(${r}, ${g}, ${b})`, theme), hex).toEqual(expected)
+        expect(generatePalette({ r, g, b }, theme), hex).toEqual(expected)
+        expect(generatePalette({ h: hsl.h, s: hsl.s * 100, l: hsl.l * 100 }, theme), hex).toEqual(expected)
+      }
+    })
+  }
 })
 
 describe('generatePalette — error handling', () => {

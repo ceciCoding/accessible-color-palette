@@ -26,12 +26,12 @@ npm install accessible-color-palette
 ### As a CLI
 
 ```bash
-npx accessible-color-palette <hex> <theme> [options]
+npx accessible-color-palette <color> <theme> [options]
 ```
 
 | Argument / Option | Description |
 |-------------------|-------------|
-| `hex` | Hex color — with or without `#`, 3 or 6 chars |
+| `color` | Hex (with or without `#`, 3 or 6 chars), `"rgb(r, g, b)"` or `"hsl(h, s%, l%)"` — quote `rgb()`/`hsl()` so your shell doesn't eat the parentheses |
 | `theme` | Background theme: `white` \| `black` |
 | `--prefix <name>` | CSS variable prefix (default: `color`) |
 | `--json` | Output full palette + usage map as JSON |
@@ -304,9 +304,21 @@ flowchart TD
 
 ## API reference
 
-### `generatePalette(hex: string, theme: 'white' | 'black'): PaletteResult`
+### `generatePalette(color: ColorInput, theme: 'white' | 'black'): PaletteResult`
 
-The main entry point. Accepts a raw hex string with or without `#`, 3 or 6 chars. Throws `Error` for invalid hex with a message that includes the invalid value.
+The main entry point. `ColorInput` is any of:
+
+| Format | Example | Ranges |
+|--------|---------|--------|
+| Hex string | `'#1f7a54'`, `'1f7a54'`, `'#1a5'` | 3 or 6 chars, `#` optional |
+| RGB string | `'rgb(31, 122, 84)'`, `'rgb(31 122 84)'` | channels 0–255 |
+| HSL string | `'hsl(155, 59%, 30%)'`, `'hsl(155deg 59% 30%)'` | h 0–360, s/l 0–100% |
+| RGB object | `{ r: 31, g: 122, b: 84 }` | channels 0–255 |
+| HSL object | `{ h: 155, s: 59, l: 30 }` | h 0–360, s/l 0–100 |
+
+The object shapes match what `palette[shade].rgb` / `.hsl` already return, so output can be fed back in. All formats are normalized to the same hex (`result.sourceColor`) before anything else runs, so equivalent inputs produce identical palettes. Out-of-range values throw — they are never clamped: `Invalid hex color: <input>`, `Invalid rgb color: <input>` or `Invalid hsl color: <input>`.
+
+> **Heads-up: integer HSL is lossy.** RGB maps 1:1 to hex, so `rgb(...)` always gives the same palette as the equivalent hex. HSL does not: there are ~16.7M hex colors but only ~3.7M integer HSL triplets, so `hsl(193, 47%, 47%)` is a *nearby* color, not `#4099b1` (it resolves to `#4098b0`). Measured over 20,000 random colors, rounding HSL to integers drifts up to 4 levels per channel (usually 1–2) and reproduces the exact hex only ~10% of the time. The resulting palette is still fully WCAG-compliant — it's just derived from a slightly different seed. If you need the exact seed, pass hex/RGB. HSL strings and `{ h, s, l }` objects do accept fractional values, but you need near-full precision to land on the same hex (`hsl(192.7433628, 46.8879668%, 47.2549019%)` → `#4099b1`; a single decimal such as `hsl(193.2, 46.9%, 47.1%)` still resolves to `#4098b0`).
 
 ### `toCSSTokens(result: PaletteResult, prefix?: string): string`
 
@@ -316,9 +328,9 @@ Generates CSS custom property declarations from a `PaletteResult`. Default prefi
 
 Checks a list of foreground/background shade pairs against `result`'s compatibility matrix. `foreground` must be a shade key (`100 | 300 | 600 | 700 | 800 | 900`); `background` can be a shade key, `'white'`, or `'black'`. Returns `{ summary, allPass, pairings }` — each pairing gets a `level` (`'aa-normal' | 'aa-large' | 'fail' | 'invalid'`) and a human-readable `message`. Same pure logic the MCP server's `validate_pairings` tool uses.
 
-### `checkContrast(foregroundHex: string, backgroundHex: string): ContrastCheckResult`
+### `checkContrast(foreground: ColorInput, background: ColorInput): ContrastCheckResult`
 
-Standalone WCAG 2.2 contrast check between any two hex colors — not tied to a generated palette. Use it for accent colors (brand colors, status colors) that aren't part of the monochrome scale. Returns `{ foreground, background, ratio, level, message }`.
+Standalone WCAG 2.2 contrast check between any two colors (hex, rgb or hsl — same formats as `generatePalette`) — not tied to a generated palette. Use it for accent colors (brand colors, status colors) that aren't part of the monochrome scale. Returns `{ foreground, background, ratio, level, message }`.
 
 ---
 

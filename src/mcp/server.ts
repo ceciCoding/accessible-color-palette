@@ -10,9 +10,7 @@ import {
   ListPromptsRequestSchema,
   GetPromptRequestSchema,
 } from '@modelcontextprotocol/sdk/types.js'
-import { generatePalette, toCSSTokens } from '../index.js'
-import { buildCompatMatrix } from '../output/tokens.js'
-import { validatePairings, checkContrast } from '../output/validation.js'
+import { generatePalette, toCSSTokens, validatePairings, checkContrast, buildCompatMatrix } from '../index.js'
 import { SessionGate } from './session-gate.js'
 
 const server = new Server(
@@ -179,7 +177,8 @@ server.setRequestHandler(ListToolsRequestSchema, () => ({
         properties: {
           hex: {
             type: 'string',
-            description: 'A valid hex color, e.g. "#1F7A54" or "1F7A54"',
+            description:
+              'A valid color: hex ("#1F7A54", "1F7A54", "#1a5"), rgb string ("rgb(31, 122, 84)") or hsl string ("hsl(155, 59%, 30%)")',
           },
           theme: {
             type: 'string',
@@ -213,7 +212,7 @@ or white/black.`,
         properties: {
           hex: {
             type: 'string',
-            description: 'Source hex color',
+            description: 'Source color: hex, "rgb(r, g, b)" or "hsl(h, s%, l%)"',
           },
           theme: {
             type: 'string',
@@ -277,7 +276,7 @@ dark or light enough.`,
         properties: {
           hex: {
             type: 'string',
-            description: 'A valid hex color',
+            description: 'A valid color: hex, "rgb(r, g, b)" or "hsl(h, s%, l%)"',
           },
           theme: {
             type: 'string',
@@ -313,11 +312,11 @@ Examples:
         properties: {
           foreground: {
             type: 'string',
-            description: 'Text/foreground hex color, e.g. "#FF5733" or "FF5733"',
+            description: 'Text/foreground color: hex ("#FF5733"), "rgb(r, g, b)" or "hsl(h, s%, l%)"',
           },
           background: {
             type: 'string',
-            description: 'Background hex color the foreground will sit on',
+            description: 'Background color (hex, rgb() or hsl() string) the foreground will sit on',
           },
         },
         required: ['foreground', 'background'],
@@ -370,7 +369,7 @@ server.setRequestHandler(CallToolRequestSchema, (request) => {
     )
 
     if (report.allPass) {
-      sessionGate.markValidated(hex, theme)
+      sessionGate.markValidated(result.sourceColor, theme)
     }
 
     const response = {
@@ -391,7 +390,7 @@ server.setRequestHandler(CallToolRequestSchema, (request) => {
     const background = args['background']
 
     if (typeof foreground !== 'string' || typeof background !== 'string') {
-      throw new Error('Invalid arguments: foreground and background must be hex color strings')
+      throw new Error('Invalid arguments: foreground and background must be color strings (hex, rgb() or hsl())')
     }
 
     const result = checkContrast(foreground, background)
@@ -410,14 +409,17 @@ server.setRequestHandler(CallToolRequestSchema, (request) => {
       throw new Error('Invalid arguments: hex must be string, theme must be "white" or "black"')
     }
 
-    if (!sessionGate.isValidated(hex, theme)) {
+    // Parse first so the gate keys on the normalized hex: "rgb(31,122,84)" and
+    // "#1F7A54" are the same color and must share one validation.
+    const result = generatePalette(hex, theme)
+
+    if (!sessionGate.isValidated(result.sourceColor, theme)) {
       throw new Error(
         `BLOCKED: generate_css_tokens requires validate_pairings to pass first for hex="${hex}" theme="${theme}". ` +
           `Call validate_pairings({ hex: "${hex}", theme: "${theme}", pairings: [...] }) and get proceed: true before retrying.`,
       )
     }
 
-    const result = generatePalette(hex, theme)
     const tokens = toCSSTokens(result, typeof prefix === 'string' ? prefix : undefined)
 
     const copyWarning = [

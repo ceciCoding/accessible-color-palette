@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { contrastRatioHex } from '../../src/math/contrast.js'
-import { parseHex } from '../../src/math/color.js'
+import { parseHex } from '../../src/input/parse.js'
 
 describe('contrastRatioHex', () => {
   it('white on black = 21', () => {
