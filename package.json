@@ -19,6 +19,7 @@
     "!dist/**/*.map",
     "README.md",
     "MCP.md",
+    "APCA.md",
     "LICENSE"
   ],
   "scripts": {
