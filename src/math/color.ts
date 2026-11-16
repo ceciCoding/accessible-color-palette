@@ -1,23 +1,5 @@
 import type { HexColor, HSL, RGB } from '../types.js'
 
-export function parseHex(input: string): HexColor {
-  const stripped = input.startsWith('#') ? input.slice(1) : input
-
-  const expanded =
-    stripped.length === 3
-      ? stripped
-          .split('')
-          .map((c) => c + c)
-          .join('')
-      : stripped
-
-  if (!/^[0-9a-fA-F]{6}$/.test(expanded)) {
-    throw new Error(`Invalid hex color: ${input}`)
-  }
-
-  return `#${expanded.toLowerCase()}` as HexColor
-}
-
 export function hexToRGB(hex: HexColor): RGB {
   const stripped = hex.startsWith('#') ? hex.slice(1) : hex
   const r = parseInt(stripped.slice(0, 2), 16) / 255

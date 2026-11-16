@@ -9,7 +9,7 @@ import {
   find900,
 } from '../../src/algorithm/palette.js'
 import { contrastRatioHex } from '../../src/math/contrast.js'
-import { parseHex } from '../../src/math/color.js'
+import { parseHex } from '../../src/input/parse.js'
 
 const WHITE = parseHex('#ffffff')
 const BLACK = parseHex('#000000')

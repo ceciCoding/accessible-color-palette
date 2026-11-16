@@ -3,10 +3,11 @@ import { generatePalette, toCSSTokens } from './index.js'
 import type { Theme } from './types.js'
 
 const HELP = `
-Usage: accessible-color-palette <hex> <theme> [options]
+Usage: accessible-color-palette <color> <theme> [options]
 
 Arguments:
-  hex              Hex color (with or without #, 3 or 6 chars)
+  color            Hex (with or without #, 3 or 6 chars), "rgb(r, g, b)" or "hsl(h, s%, l%)"
+                   — quote rgb()/hsl() so your shell doesn't eat the parentheses
   theme            Background theme: white | black
 
 Options:
@@ -18,6 +19,8 @@ Examples:
   accessible-color-palette 1F7A54 white
   accessible-color-palette "#239062" black --prefix brand
   accessible-color-palette 1F7A54 white --json
+  accessible-color-palette "rgb(31, 122, 84)" white
+  accessible-color-palette "hsl(155, 59%, 30%)" black
 `.trim()
 
 const args = process.argv.slice(2)

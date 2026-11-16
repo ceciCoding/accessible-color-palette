@@ -19,6 +19,22 @@ export interface RGB {
   b: number
 }
 
+// Public input shapes. Same scale as ShadeEntry.rgb / ShadeEntry.hsl, so a
+// library output can be fed straight back in as input.
+export interface RGBInput {
+  r: number  // 0–255
+  g: number
+  b: number
+}
+
+export interface HSLInput {
+  h: number  // 0–360
+  s: number  // 0–100
+  l: number  // 0–100
+}
+
+export type ColorInput = string | RGBInput | HSLInput
+
 export interface ShadeEntry {
   hex: HexColor
   rgb: { r: number; g: number; b: number }
