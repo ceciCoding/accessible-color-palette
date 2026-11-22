@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { darkenToRatio, lightenToRatio } from '../../src/algorithm/primitives.js'
 import { contrastRatioHex } from '../../src/math/contrast.js'
-import { parseHex } from '../../src/math/color.js'
+import { parseHex } from '../../src/input/parse.js'
 
 const anchor = parseHex('#1f7a54')
 

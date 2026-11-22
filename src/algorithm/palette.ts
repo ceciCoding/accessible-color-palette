@@ -1,4 +1,5 @@
-import { hexToHSL, hexToRGB, hslToHex, parseHex } from '../math/color.js'
+import { parseHex } from '../input/parse.js'
+import { hexToHSL, hexToRGB, hslToHex } from '../math/color.js'
 import { contrastRatioHex } from '../math/contrast.js'
 import { darkenToRatio, lightenToRatio } from './primitives.js'
 import { AA_LARGE, AA_NORMAL } from './thresholds.js'

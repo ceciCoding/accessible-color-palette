@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { buildCompatibilityMatrix } from '../../src/algorithm/compatibility.js'
 import { buildPalette } from '../../src/algorithm/palette.js'
-import { parseHex } from '../../src/math/color.js'
+import { parseHex } from '../../src/input/parse.js'
 import type { MatrixKey } from '../../src/types.js'
 
 const SHADE_KEYS: MatrixKey[] = ['100', '300', '600', '700', '800', '900']

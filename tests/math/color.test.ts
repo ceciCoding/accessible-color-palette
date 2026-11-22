@@ -1,11 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import {
-  hexToHSL,
-  hexToRGB,
-  hslToHex,
-  parseHex,
-  rgbToHex,
-} from '../../src/math/color.js'
+import { parseHex } from '../../src/input/parse.js'
+import { hexToHSL, hexToRGB, hslToHex, rgbToHex } from '../../src/math/color.js'
 
 describe('hexToRGB', () => {
   it('converts white', () => {
@@ -43,46 +38,4 @@ describe('hslToHex / hexToHSL roundtrip', () => {
       expect(hslToHex(hexToHSL(parsed))).toBe(parsed)
     })
   }
-})
-
-describe('parseHex', () => {
-  it('accepts 6-char hex with #', () => {
-    expect(parseHex('#1f7a54')).toBe('#1f7a54')
-  })
-
-  it('accepts 6-char hex without #', () => {
-    expect(parseHex('1f7a54')).toBe('#1f7a54')
-  })
-
-  it('accepts 3-char shorthand with #', () => {
-    expect(parseHex('#abc')).toBe('#aabbcc')
-  })
-
-  it('accepts 3-char shorthand without #', () => {
-    expect(parseHex('abc')).toBe('#aabbcc')
-  })
-
-  it('normalizes to lowercase', () => {
-    expect(parseHex('#1F7A54')).toBe('#1f7a54')
-  })
-
-  it('throws for empty string', () => {
-    expect(() => parseHex('')).toThrow('Invalid hex color')
-  })
-
-  it('throws for invalid chars', () => {
-    expect(() => parseHex('gg0000')).toThrow('Invalid hex color')
-  })
-
-  it('throws for wrong length', () => {
-    expect(() => parseHex('#12345')).toThrow('Invalid hex color')
-  })
-
-  it('throws for non-hex string', () => {
-    expect(() => parseHex('notacolor')).toThrow('Invalid hex color')
-  })
-
-  it('error message includes the invalid input', () => {
-    expect(() => parseHex('notacolor')).toThrow('notacolor')
-  })
 })

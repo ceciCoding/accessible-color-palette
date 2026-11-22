@@ -1,6 +1,5 @@
-import type { PaletteResult, ShadeKey } from '../types.js'
+import type { HexColor, PaletteResult, ShadeKey } from '../types.js'
 import { buildCompatMatrix } from './tokens.js'
-import { parseHex } from '../math/color.js'
 import { contrastRatioHex } from '../math/contrast.js'
 import { AA_NORMAL, AA_LARGE } from '../algorithm/thresholds.js'
 
@@ -105,13 +104,10 @@ export interface ContrastCheckResult {
   message: string
 }
 
-// Standalone contrast check between two arbitrary hex colors — not tied to a
-// generated palette. Used to validate accent colors (or any free-form hex)
-// against a known background, e.g. white/black or a shade hex already
-// returned by generate_palette/validate_pairings.
-export function checkContrast(foregroundHex: string, backgroundHex: string): ContrastCheckResult {
-  const foreground = parseHex(foregroundHex)
-  const background = parseHex(backgroundHex)
+// Standalone contrast report between two already-validated colors — not tied
+// to a generated palette. Takes HexColor only: raw user input is parsed at the
+// public boundary (`checkContrast` in src/index.ts), never here.
+export function describeContrast(foreground: HexColor, background: HexColor): ContrastCheckResult {
   const ratio = contrastRatioHex(foreground, background)
 
   if (ratio >= AA_NORMAL) {

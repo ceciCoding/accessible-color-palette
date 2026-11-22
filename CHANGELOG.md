@@ -6,6 +6,30 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [2.4.0] — 2026-11-16
+
+### Added
+
+- **RGB and HSL input** — `generatePalette` and `checkContrast` now accept `rgb(r, g, b)` / `hsl(h, s%, l%)` strings (comma or space separated) and `{ r, g, b }` (0–255) / `{ h, s, l }` (h 0–360, s/l 0–100) objects, in addition to hex. The object shapes match `ShadeEntry.rgb` / `.hsl`, so library output can be fed back in. New exported types: `ColorInput`, `RGBInput`, `HSLInput`.
+- **`InvalidColorError`** — exported class (`extends Error`) now thrown by `generatePalette` and `checkContrast` for any invalid color input. Fields: `format: 'hex' | 'rgb' | 'hsl' | 'unknown'`, `input: string` (the offending input, JSON-serialized for objects) and `message`. Also exports the `InvalidColorFormat` type. Consumers can use `instanceof InvalidColorError` instead of matching on message text.
+- The CLI and the MCP tools (`generate_palette`, `validate_pairings`, `generate_css_tokens`, `check_contrast`) accept `rgb()` / `hsl()` strings too.
+
+### Changed
+
+- The MCP session gate now keys on the normalized hex, so `validate_pairings` with `"#1F7A54"` unlocks `generate_css_tokens` for `"rgb(31, 122, 84)"` (and for `"1f7a54"`, which previously didn't match `"#1f7a54"`).
+
+### Notes
+
+- Backwards compatible: every previously valid hex input behaves identically, return types are unchanged, and `InvalidColorError` is still an `Error`, so existing `catch` blocks keep working. `parseColor` stays internal.
+- Error messages keep their `Invalid hex color: <input>` prefix, but now append an `Accepts …` hint listing the valid formats. Code that matches on the full message text should match the prefix (or use `instanceof InvalidColorError`).
+- Out-of-range rgb/hsl values throw `Invalid rgb color: …` / `Invalid hsl color: …`; they are never clamped.
+- Hex strings are now trimmed (`" #FFF "` is valid), consistent with `rgb()` / `hsl()` strings.
+- Color strings longer than 64 characters are rejected up front with `InvalidColorError`, and the `rgb()` / `hsl()` separator pattern is unambiguous, so hostile input cannot trigger catastrophic regex backtracking.
+- Unserializable inputs (circular objects, `BigInt` channels) throw `InvalidColorError` like any other invalid color, never a raw `TypeError`.
+- The `palette://{hex}/{theme}` resource is still hex-only.
+
+---
+
 ## [2.3.0] — 2026-06-25
 
 ### Added
